@@ -1,44 +1,42 @@
 package com.xiaoming.utils
 
-import com.android.ddmlib.IShellOutputReceiver
 import com.android.ddmlib.InstallReceiver
+import com.android.ddmlib.MultiLineReceiver
 import com.xiaoming.state.GlobalState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.imageio.ImageIO
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 object AdbUtil {
-
-    //默认执行
-    private val receiver = object : IShellOutputReceiver {
-        override fun addOutput(data: ByteArray?, offset: Int, length: Int) {
-
-        }
-
-        override fun flush() {
-        }
-
-        override fun isCancelled(): Boolean {
-            return true
-        }
-
-    }
-
     /**
      * 执行shell命令
      * @param cmd shell命令
-     * @param toast 是否需要弹窗
-     * @param iShellOutputReceiver 执行shell回调
+     * @param receiver 执行shell回调
      */
+
+    interface ShellCallBack {
+        fun result(value: String)
+    }
+
     fun shell(
-        cmd: String, toast: Boolean = false, iShellOutputReceiver: IShellOutputReceiver? = null
+        cmd: String,
+        receiver: MultiLineReceiver? = null,
+        result: ShellCallBack? = null
     ) {
         CoroutineScope(Dispatchers.Default).launch {
-            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, iShellOutputReceiver ?: receiver)
+            GlobalState.sCurrentDevice.value?.executeShellCommand(
+                cmd,
+                receiver ?: object : MultiLineReceiver() {
+                    override fun isCancelled(): Boolean = false
+
+                    override fun processNewLines(lines: Array<out String>?) {
+                        result?.result(lines?.joinToString("") ?: "")
+                    }
+                })
         }
     }
 
@@ -58,10 +56,10 @@ object AdbUtil {
             GlobalState.sCurrentDevice.value?.let {
                 val currentDateTime = LocalDateTime.now()
                 val formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss")
-                val path = currentDateTime.format(formatter) + ".png"
+                val fileName = currentDateTime.format(formatter) + ".png"
                 val screenshot = it.screenshot.asBufferedImage()
                 ClipboardUtils.setClipboardImage(screenshot)
-                ImageIO.write(screenshot, "png", File(GlobalState.desktop.value, path))
+                ImageIO.write(screenshot, "png", File(GlobalState.desktop.value, fileName))
             }
         }
     }
@@ -128,6 +126,41 @@ object AdbUtil {
     fun install(packagePath: String, receiver: InstallReceiver? = null) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.installPackage(packagePath, true, receiver)
+        }
+    }
+
+
+    /**
+     * 查找当前activity
+     * @param delayMs 超时时间
+     */
+    suspend fun findCurrentActivity() = suspendCoroutine {
+        CoroutineScope(Dispatchers.Default).launch {
+            val shell = shell("dumpsys window | grep mCurrentFocus", 200)
+            val regex = Regex(pattern = """\s\S+/\S+}""")
+            val res = regex.find(shell)?.value?.replace("}", "")?.trim() ?: ""
+            //复制到剪切板
+            ClipboardUtils.setSysClipboardText(res)
+            it.resume(res)
+        }
+    }
+
+
+    /**
+     * 执行shell并且返回结果
+     * @param cmd shell命令
+     * @param timeMillis 超时时间
+     */
+    suspend fun shell(cmd: String, timeMillis: Long) = suspendCoroutine {
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
+                override fun isCancelled(): Boolean = false
+                override fun processNewLines(lines: Array<out String>?) {
+                    it.resume(lines?.joinToString("") ?: "")
+                }
+            })
+            delay(timeMillis)
+            it.resume("")
         }
     }
 }

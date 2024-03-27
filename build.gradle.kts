@@ -24,8 +24,6 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation("com.android.tools.ddms:ddmlib:31.3.1")
-                implementation ("org.aspectj:aspectjtools:1.9.6")
-                implementation ("org.aspectj:aspectjweaver:1.9.6")
             }
         }
         val jvmTest by getting

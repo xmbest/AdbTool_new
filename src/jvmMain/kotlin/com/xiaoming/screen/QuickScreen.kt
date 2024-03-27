@@ -14,11 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.android.ddmlib.MultiLineReceiver
 import com.xiaming.utils.ImgUtil.getRealLocation
-import com.xiaoming.componts.ContentMoreRowColumn
-import com.xiaoming.componts.ContentNRow
-import com.xiaoming.componts.General
-import com.xiaoming.componts.Item
+import com.xiaoming.componts.*
 import com.xiaoming.entity.KeyMapper
 import com.xiaoming.utils.AdbUtil
 import config.route_left_item_color
@@ -115,15 +113,42 @@ fun QuickScreen() {
                 }
                 ContentNRow {
                     Item(keyMapperList4[0].icon, keyMapperList4[0].name, false) {
-
+                        CoroutineScope(Dispatchers.Default).launch {
+                            val str = AdbUtil.findCurrentActivity()
+                            if (str.isNotBlank()) {
+                                showingSimpleDialog.value = true
+                                title.value = "current activity: "
+                                titleColor.value = GOOGLE_GREEN
+                                needCancel.value = true
+                                contentText.value = str
+                                callback.value = {}
+                            }
+                        }
                     }
                     Item(keyMapperList4[1].icon, keyMapperList4[1].name, false) {
-
+                        showingSimpleDialog.value = true
+                        title.value = "警告"
+                        titleColor.value = GOOGLE_RED
+                        needCancel.value = true
+                        contentText.value = "是否清理logcat缓存"
+                        callback.value = {
+                            AdbUtil.shell("logcat -c")
+                            callback.value = {}
+                        }
                     }
                     Item(keyMapperList4[2].icon, keyMapperList4[2].name, false) {
+
                     }
                     Item(keyMapperList4[3].icon, keyMapperList4[3].name, false) {
-
+                        showingSimpleDialog.value = true
+                        title.value = "警告"
+                        titleColor.value = GOOGLE_RED
+                        needCancel.value = true
+                        contentText.value = "是否重启设备"
+                        callback.value = {
+                            AdbUtil.reboot()
+                            callback.value = {}
+                        }
                     }
                 }
             }
@@ -258,12 +283,7 @@ fun QuickScreen() {
 fun applicationManager(runnable: () -> Unit) {
     if (packageName.value.isBlank()) {
         CoroutineScope(Dispatchers.Default).launch {
-//            if (showToast.value) {
-//                delay(1000)
-//            }
-//            currentToastTask.value = "ApplicationManager"
-//            toastText.value = "请选择应用后重试"
-//            showToast.value = true
+
         }
     } else {
         runnable.invoke()

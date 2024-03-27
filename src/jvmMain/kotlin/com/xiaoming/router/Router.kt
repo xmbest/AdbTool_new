@@ -14,11 +14,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.xiaming.module.AdbModule
-import com.xiaming.screen.HomeScreen
-import com.xiaming.screen.SettingScreen
 import com.xiaming.utils.ImgUtil.getRealLocation
-import com.xiaoming.entity.Page
-import com.xiaoming.screen.QuickScreen
+import com.xiaoming.componts.*
 import com.xiaoming.state.GlobalState
 import config.*
 
@@ -32,6 +29,18 @@ fun Router() {
             bottom = route_left_padding_bottom
         ))
         Right(Modifier.fillMaxHeight().weight(1f).background(route_right_background))
+    }
+    //显示
+    Box(modifier = Modifier.fillMaxSize()){
+        if (showingSimpleDialog.value) {
+            SimpleDialog(
+                title = title.value,
+                titleColor = titleColor.value,
+                contentText = contentText.value,
+                needCancel = needCancel.value,
+                callback = callback.value
+            )
+        }
     }
 }
 
