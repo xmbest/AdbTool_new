@@ -2,6 +2,7 @@ package com.xiaoming.utils
 
 import com.android.ddmlib.InstallReceiver
 import com.android.ddmlib.MultiLineReceiver
+import com.xiaming.module.AdbModule
 import com.xiaoming.state.GlobalState
 import kotlinx.coroutines.*
 import java.io.File
@@ -51,10 +52,16 @@ object AdbUtil {
                     it.resume(lines?.joinToString("\n") ?: "")
                 }
             })
+            println(cmd)
             delay(timeMillis)
             it.resume("")
         }
     }
+
+    fun getProp(key: String): String {
+        return GlobalState.sCurrentDevice.value?.getProperty(key) ?: ""
+    }
+
 
 
     /**
@@ -73,9 +80,10 @@ object AdbUtil {
                 val currentDateTime = LocalDateTime.now()
                 val formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss")
                 val fileName = currentDateTime.format(formatter) + ".png"
+                val desktop = File(GlobalState.sHomePath.value, "Desktop")
                 val screenshot = it.screenshot.asBufferedImage()
                 ClipboardUtils.setClipboardImage(screenshot)
-                ImageIO.write(screenshot, "png", File(GlobalState.desktop.value, fileName))
+                ImageIO.write(screenshot, "png", File(desktop, fileName))
             }
         }
     }
@@ -142,6 +150,20 @@ object AdbUtil {
     fun install(packagePath: String, receiver: InstallReceiver? = null) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.installPackage(packagePath, true, receiver)
+        }
+    }
+
+
+    fun pull(local:String,remote:String){
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.pullFile(remote,local)
+        }
+    }
+
+
+    fun push(local:String,remote:String){
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.pushFile(local,remote)
         }
     }
 

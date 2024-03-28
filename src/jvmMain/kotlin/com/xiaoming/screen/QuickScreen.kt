@@ -14,12 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.android.ddmlib.MultiLineReceiver
 import com.xiaming.utils.ImgUtil.getRealLocation
 import com.xiaoming.componts.*
+import com.xiaoming.entity.DeviceInfo
 import com.xiaoming.entity.KeyMapper
 import com.xiaoming.utils.AdbUtil
-import com.xiaoming.utils.AdbUtil.shell
 import config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,18 +26,16 @@ import kotlinx.coroutines.launch
 import theme.GOOGLE_BLUE
 import theme.GOOGLE_GREEN
 import theme.GOOGLE_RED
+import javax.swing.filechooser.FileSystemView
 
 val packageName = mutableStateOf("")
 val quickSettingKeyword = mutableStateOf("")
-
-
+val appList = mutableStateListOf<String>()
+val expanded = mutableStateOf(false)
+val deviceInfo = mutableStateOf(DeviceInfo())
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun QuickScreen() {
-    var expanded by remember {
-        mutableStateOf(false)
-    }
-    val appList = mutableStateListOf<String>()
     val keyMapperList1 = listOf(
         KeyMapper(getRealLocation("task"), 187, "任务列表"),
         KeyMapper(getRealLocation("home"), 3, "回到桌面"),
@@ -74,8 +71,17 @@ fun QuickScreen() {
             Row(modifier = Modifier.fillMaxSize().padding(start = 20.dp, top = 20.dp)) {
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
+                        Text(
+                            "${deviceInfo.value.brand} ${deviceInfo.value.device} \n" +
+                                    "安卓版本: ${deviceInfo.value.androidVersion} \n" +
+                                    "系统版本: ${deviceInfo.value.systemVersion} \n" +
+                                    "代号: ${deviceInfo.value.model} \n" +
+                                    "处理器: ${deviceInfo.value.cpu} \n" +
+                                    "序列号: ${deviceInfo.value.serialNo} \n" +
+                                    "分辨率: ${deviceInfo.value.density} \n" +
+                                    "可用内存: ${deviceInfo.value.memory} \n"
+                        )
                     }
-
                 }
             }
 
@@ -103,6 +109,8 @@ fun QuickScreen() {
                     }
                     Item(keyMapperList3[1].icon, keyMapperList3[1].name) {
                         AdbUtil.shell("service call statusbar 2")
+
+                        println(FileSystemView.getFileSystemView().homeDirectory.absolutePath)
                     }
                     Item(keyMapperList3[2].icon, keyMapperList3[2].name) {
                         AdbUtil.screenshot()
@@ -144,18 +152,18 @@ fun QuickScreen() {
                         }
                     }
                     Item(getRealLocation("power"), "停止运行", false) {
-                        applicationManager {
-                            //AdbUtil.forceStop(packageName.value)
+                        SimpleDialog.confirm("是否停止运行 ${packageName.value}?"){
+                            AdbUtil.forceStop(packageName.value)
                         }
                     }
                     Item(getRealLocation("clear"), "清除数据", false) {
-                        applicationManager {
-                            // AdbUtil.clear(packageName.value)
+                        SimpleDialog.confirm("是否清除 ${packageName.value} 数据?"){
+                            AdbUtil.clear(packageName.value)
                         }
                     }
                     Item(getRealLocation("delete"), "卸载应用", false) {
-                        applicationManager {
-                            //AdbUtil.uninstall(packageName.value)
+                        SimpleDialog.confirm("是否卸载应用 ${packageName.value}?"){
+                            AdbUtil.uninstall(packageName.value)
                         }
                     }
                 }
@@ -172,7 +180,6 @@ fun QuickScreen() {
 
                     }
                     Item(getRealLocation("save"), "保存程序到电脑", false) {
-
                     }
                 }
             }
@@ -190,21 +197,19 @@ fun QuickScreen() {
                             horizontalArrangement = Arrangement.End
                         ) {
                             Text(
-                                if (packageName.value.isBlank()) "请选择应用" else packageName.value,
+                                packageName.value.ifBlank { "请选择应用" },
                                 color = GOOGLE_BLUE,
                                 maxLines = 2,
                                 textAlign = TextAlign.End,
                                 modifier = Modifier.clickable {
-                                    val newList = syncAppList(quickSettingKeyword.value)
-                                    appList.clear()
-                                    appList.addAll(newList)
-                                    expanded = true
+                                    syncAppList()
+                                    expanded.value = true
                                 }
                             )
                             DropdownMenu(
-                                expanded = expanded,
+                                expanded = expanded.value ,
                                 onDismissRequest = {
-                                    expanded = false
+                                    expanded.value  = false
                                 },
                                 offset = DpOffset(x = 260.dp, y = 2.dp)
                             ) {
@@ -217,9 +222,7 @@ fun QuickScreen() {
                                                 null,
                                                 modifier = Modifier.width(20.dp).height(20.dp).clickable {
                                                     quickSettingKeyword.value = ""
-                                                    val newList = syncAppList(quickSettingKeyword.value)
-                                                    appList.clear()
-                                                    appList.addAll(newList)
+                                                    syncAppList(quickSettingKeyword.value)
                                                 },
                                                 tint = route_left_item_color
                                             )
@@ -227,9 +230,7 @@ fun QuickScreen() {
                                         placeholder = { Text("keyword") },
                                         onValueChange = {
                                             quickSettingKeyword.value = it
-                                            val newList = syncAppList(quickSettingKeyword.value)
-                                            appList.clear()
-                                            appList.addAll(newList)
+                                            syncAppList(quickSettingKeyword.value)
                                         },
                                         modifier = Modifier.weight(1f).height(48.dp)
                                             .padding(end = 10.dp, start = 10.dp)
@@ -237,14 +238,14 @@ fun QuickScreen() {
                                 }
                                 if (appList.size == 0) {
                                     DropdownMenuItem(onClick = {
-                                        expanded = false
+                                        expanded.value  = false
                                     }) {
                                         Text(text = "未找到相关应用")
                                     }
                                 } else {
                                     appList.forEach {
                                         DropdownMenuItem(onClick = {
-                                            expanded = false
+                                            expanded.value = false
                                             packageName.value = it
                                         }) {
                                             Text(text = it)
@@ -272,20 +273,21 @@ fun applicationManager(runnable: () -> Unit) {
     }
 }
 
-fun syncAppList(keyWord: String = ""): List<String> {
-    val appList = ArrayList<String>()
+fun syncAppList(keyWord: String = "") {
+    val list = ArrayList<String>()
     var cmd = "pm list packages -f"
     if (keyWord.isNotBlank()) {
         cmd += " | grep -E '$keyWord'"
     }
     CoroutineScope(Dispatchers.Default).launch{
-        val packages = shell(cmd,200)
+        val packages = AdbUtil.shell(cmd,500)
         val split = packages.split("\n").filter { it.isNotBlank() }.map { it.substring(8) }
         split.forEach {
             val index = it.lastIndexOf("=")
             val packageName = it.substring(index + 1)
-            appList.add(packageName)
+            list.add(packageName)
         }
+        appList.clear()
+        appList.addAll(list)
     }
-    return appList
 }

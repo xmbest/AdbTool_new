@@ -29,5 +29,5 @@ object GlobalState{
     //当前选中的页码
     val sCurrentIndex = mutableStateOf(0)
     //桌面位置
-    val desktop = mutableStateOf(FileSystemView.getFileSystemView().homeDirectory.absoluteFile)
+    val sHomePath = mutableStateOf(FileSystemView.getFileSystemView().homeDirectory.absoluteFile)
 }
