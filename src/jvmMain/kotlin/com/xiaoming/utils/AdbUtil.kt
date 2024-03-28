@@ -22,21 +22,37 @@ object AdbUtil {
         fun result(value: String)
     }
 
-    fun shell(
-        cmd: String,
-        receiver: MultiLineReceiver? = null,
-        result: ShellCallBack? = null
-    ) {
+    /**
+     * 无需结果的cmd命令
+     * @param cmd shell命令
+     */
+    fun shell(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            GlobalState.sCurrentDevice.value?.executeShellCommand(
-                cmd,
-                receiver ?: object : MultiLineReceiver() {
-                    override fun isCancelled(): Boolean = false
+            println(cmd)
+            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
+                override fun isCancelled(): Boolean = false
+                override fun processNewLines(lines: Array<out String>?) {
+                }
+            })
+        }
+    }
 
-                    override fun processNewLines(lines: Array<out String>?) {
-                        result?.result(lines?.joinToString("") ?: "")
-                    }
-                })
+
+    /**
+     * 执行shell并且返回结果
+     * @param cmd shell命令
+     * @param timeMillis 超时时间
+     */
+    suspend fun shell(cmd: String, timeMillis: Long) = suspendCoroutine {
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
+                override fun isCancelled(): Boolean = false
+                override fun processNewLines(lines: Array<out String>?) {
+                    it.resume(lines?.joinToString("\n") ?: "")
+                }
+            })
+            delay(timeMillis)
+            it.resume("")
         }
     }
 
@@ -145,22 +161,4 @@ object AdbUtil {
         }
     }
 
-
-    /**
-     * 执行shell并且返回结果
-     * @param cmd shell命令
-     * @param timeMillis 超时时间
-     */
-    suspend fun shell(cmd: String, timeMillis: Long) = suspendCoroutine {
-        CoroutineScope(Dispatchers.Default).launch {
-            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
-                override fun isCancelled(): Boolean = false
-                override fun processNewLines(lines: Array<out String>?) {
-                    it.resume(lines?.joinToString("") ?: "")
-                }
-            })
-            delay(timeMillis)
-            it.resume("")
-        }
-    }
 }

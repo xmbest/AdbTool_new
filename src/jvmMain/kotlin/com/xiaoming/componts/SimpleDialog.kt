@@ -14,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import theme.GOOGLE_BLUE
+import theme.GOOGLE_GREEN
 import theme.GOOGLE_RED
+import theme.GOOGLE_YELLOW
 
 
 /**
@@ -83,4 +85,50 @@ fun SimpleDialog(
         }, title = {
             Text(color = titleColor, text = title)
         })
+}
+
+object SimpleDialog {
+    /**
+     * 错误弹窗
+     * @param text 错误信息
+     */
+    fun error(text: String) {
+        title.value = "异常"
+        titleColor.value = GOOGLE_RED
+        needCancel.value = false
+        contentText.value = text
+        callback.value = {}
+        showingSimpleDialog.value = true
+    }
+
+
+    /**
+     * 提示弹窗
+     * @param text 错误信息
+     */
+    fun info(text: String,titleText: String = "提示") {
+        title.value = titleText
+        titleColor.value = GOOGLE_GREEN
+        needCancel.value = false
+        contentText.value = text
+        callback.value = {}
+        showingSimpleDialog.value = true
+    }
+
+    /**
+     * 确认弹窗
+     * @param text 确认内容
+     * @param block 点击确认后的回调
+     */
+    fun confirm(text: String, block: (() -> Unit)) {
+        title.value = "警告"
+        titleColor.value = GOOGLE_YELLOW
+        needCancel.value = true
+        contentText.value = text
+        callback.value = {
+            block.invoke()
+            callback.value = {}
+        }
+        showingSimpleDialog.value = true
+    }
 }

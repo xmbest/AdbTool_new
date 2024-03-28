@@ -19,6 +19,7 @@ import com.xiaming.utils.ImgUtil.getRealLocation
 import com.xiaoming.componts.*
 import com.xiaoming.entity.KeyMapper
 import com.xiaoming.utils.AdbUtil
+import com.xiaoming.utils.AdbUtil.shell
 import config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,6 @@ fun QuickScreen() {
         mutableStateOf(false)
     }
     val appList = mutableStateListOf<String>()
-    val keyPre = "input keyevent "
     val keyMapperList1 = listOf(
         KeyMapper(getRealLocation("task"), 187, "任务列表"),
         KeyMapper(getRealLocation("home"), 3, "回到桌面"),
@@ -116,38 +116,20 @@ fun QuickScreen() {
                         CoroutineScope(Dispatchers.Default).launch {
                             val str = AdbUtil.findCurrentActivity()
                             if (str.isNotBlank()) {
-                                showingSimpleDialog.value = true
-                                title.value = "current activity: "
-                                titleColor.value = GOOGLE_GREEN
-                                needCancel.value = true
-                                contentText.value = str
-                                callback.value = {}
+                                SimpleDialog.info(str,"current activity:")
                             }
                         }
                     }
                     Item(keyMapperList4[1].icon, keyMapperList4[1].name, false) {
-                        showingSimpleDialog.value = true
-                        title.value = "警告"
-                        titleColor.value = GOOGLE_RED
-                        needCancel.value = true
-                        contentText.value = "是否清理logcat缓存"
-                        callback.value = {
+                        SimpleDialog.confirm("是否清理logcat缓存"){
                             AdbUtil.shell("logcat -c")
-                            callback.value = {}
                         }
                     }
                     Item(keyMapperList4[2].icon, keyMapperList4[2].name, false) {
-
                     }
                     Item(keyMapperList4[3].icon, keyMapperList4[3].name, false) {
-                        showingSimpleDialog.value = true
-                        title.value = "警告"
-                        titleColor.value = GOOGLE_RED
-                        needCancel.value = true
-                        contentText.value = "是否重启设备"
-                        callback.value = {
+                        SimpleDialog.confirm("是否重启设备"){
                             AdbUtil.reboot()
-                            callback.value = {}
                         }
                     }
                 }
@@ -296,12 +278,14 @@ fun syncAppList(keyWord: String = ""): List<String> {
     if (keyWord.isNotBlank()) {
         cmd += " | grep -E '$keyWord'"
     }
-//    val packages = shell(cmd)
-//    val split = packages.trim().split("\n").filter { it.isNotBlank() }.map { it.substring(8) }
-//    split.forEach {
-//        val index = it.lastIndexOf("=")
-//        val packageName = it.substring(index + 1)
-//        appList.add(packageName)
-//    }
+    CoroutineScope(Dispatchers.Default).launch{
+        val packages = shell(cmd,200)
+        val split = packages.split("\n").filter { it.isNotBlank() }.map { it.substring(8) }
+        split.forEach {
+            val index = it.lastIndexOf("=")
+            val packageName = it.substring(index + 1)
+            appList.add(packageName)
+        }
+    }
     return appList
 }
