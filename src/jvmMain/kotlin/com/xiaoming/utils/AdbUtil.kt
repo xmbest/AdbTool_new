@@ -2,6 +2,7 @@ package com.xiaoming.utils
 
 import com.android.ddmlib.InstallReceiver
 import com.android.ddmlib.MultiLineReceiver
+import com.android.ddmlib.Timeout
 import com.xiaming.module.AdbModule
 import com.xiaoming.state.GlobalState
 import kotlinx.coroutines.*
@@ -18,10 +19,6 @@ object AdbUtil {
      * @param cmd shell命令
      * @param receiver 执行shell回调
      */
-
-    interface ShellCallBack {
-        fun result(value: String)
-    }
 
     /**
      * 无需结果的cmd命令
@@ -45,23 +42,35 @@ object AdbUtil {
      * @param timeMillis 超时时间
      */
     suspend fun shell(cmd: String, timeMillis: Long) = suspendCoroutine {
+        val suspendSingle = it
         CoroutineScope(Dispatchers.Default).launch {
+            var resume = false
             GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
                 override fun isCancelled(): Boolean = false
                 override fun processNewLines(lines: Array<out String>?) {
-                    it.resume(lines?.joinToString("\n") ?: "")
+                    if (lines?.isNotEmpty() == true && isActive && !resume) {
+                        resume = true
+                        val str = lines.filter { line -> line.isNotEmpty() }.joinToString("\n")
+                        if (str.isNotBlank()){
+                            suspendSingle.resume(str)
+                            println("=======================")
+                            println(str)
+                        }
+                    }
                 }
             })
             println(cmd)
             delay(timeMillis)
-            it.resume("")
+            if (isActive && !resume){
+                resume = true
+                suspendSingle.resume("")
+            }
         }
     }
 
     fun getProp(key: String): String {
         return GlobalState.sCurrentDevice.value?.getProperty(key) ?: ""
     }
-
 
 
     /**
@@ -80,7 +89,11 @@ object AdbUtil {
                 val currentDateTime = LocalDateTime.now()
                 val formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss")
                 val fileName = currentDateTime.format(formatter) + ".png"
-                val desktop = File(GlobalState.sHomePath.value, "Desktop")
+                val desktop =
+                    if (GlobalState.sHomePath.value.contains("Desktop")) File(GlobalState.sHomePath.value) else File(
+                        GlobalState.sHomePath.value,
+                        "Desktop"
+                    )
                 val screenshot = it.screenshot.asBufferedImage()
                 ClipboardUtils.setClipboardImage(screenshot)
                 ImageIO.write(screenshot, "png", File(desktop, fileName))
@@ -111,7 +124,11 @@ object AdbUtil {
      * @param packageName 包名
      */
     fun start(packageName: String) {
-        shell("am start $packageName")
+        CoroutineScope(Dispatchers.Default).launch {
+            val launchActivity = getLaunchActivity(packageName)
+            println("am start packageName = $packageName,launchActivity = $launchActivity")
+            if (launchActivity.isBlank()) shell("monkey -p $packageName -v 1") else shell("am start $launchActivity")
+        }
     }
 
     /**
@@ -153,17 +170,25 @@ object AdbUtil {
         }
     }
 
-
-    fun pull(local:String,remote:String){
+    /**
+     * 拉取文件到本地
+     * @param local 本地路径
+     * @param remote 目标调试设备路径
+     */
+    fun pull(remote: String, local: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            GlobalState.sCurrentDevice.value?.pullFile(remote,local)
+            GlobalState.sCurrentDevice.value?.pullFile(remote, local)
         }
     }
 
-
-    fun push(local:String,remote:String){
+    /**
+     * 推送本地文件到设备
+     * @param local 本地路径
+     * @param remote 目标调试设备路径
+     */
+    fun push(local: String, remote: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            GlobalState.sCurrentDevice.value?.pushFile(local,remote)
+            GlobalState.sCurrentDevice.value?.pushFile(local, remote)
         }
     }
 
@@ -180,6 +205,50 @@ object AdbUtil {
             //复制到剪切板
             ClipboardUtils.setSysClipboardText(res)
             it.resume(res)
+        }
+    }
+
+
+    /**
+     * 查找应用启动activity
+     */
+    suspend fun getLaunchActivity(packageName: String) = suspendCoroutine {
+        CoroutineScope(Dispatchers.Default).launch {
+            val launchActivity = dumpsys(packageName, "-A 1 MAIN", 500)
+            if (launchActivity.isBlank()) return@launch it.resume("")
+            val outLines = launchActivity.lines()
+            if (outLines.isEmpty()) {
+                return@launch it.resume("")
+            } else {
+                for (value in outLines) {
+                    if (value.contains("$packageName/")) {
+                        return@launch it.resume(
+                            value.substring(
+                                value.indexOf("$packageName/"), value.indexOf(" filter")
+                            )
+                        )
+                    }
+                }
+                return@launch it.resume("")
+            }
+        }
+
+    }
+
+
+    /**
+     * dumpsys命令
+     * @param packageName 包名
+     * @param filter 过滤关键词
+     */
+    private suspend fun dumpsys(packageName: String, filter: String = "", timeout: Long = 300) = suspendCoroutine {
+        CoroutineScope(Dispatchers.Default).launch {
+            val result =
+                shell(
+                    "dumpsys package $packageName${if (filter.isNotBlank()) " findStr -E '$filter'" else ""}",
+                    timeout
+                )
+            it.resume(result)
         }
     }
 

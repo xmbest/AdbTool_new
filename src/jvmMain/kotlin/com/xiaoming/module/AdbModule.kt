@@ -59,11 +59,12 @@ object AdbModule {
      * @param device 切换的设备
      */
     fun changeDevice(device: IDevice?) {
-        if (GlobalState.sDeviceSet.contains(device)) {
+        if (device == null){
+            deviceInfo.value = DeviceInfo()
+            GlobalState.sCurrentDevice.value = null
+        }else{
             GlobalState.sCurrentDevice.value = device as DeviceImpl
             loadDeviceInfo()
-        } else {
-            deviceInfo.value = DeviceInfo()
         }
     }
 

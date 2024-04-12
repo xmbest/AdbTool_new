@@ -134,6 +134,7 @@ fun QuickScreen() {
                         }
                     }
                     Item(keyMapperList4[2].icon, keyMapperList4[2].name, false) {
+
                     }
                     Item(keyMapperList4[3].icon, keyMapperList4[3].name, false) {
                         SimpleDialog.confirm("是否重启设备"){
@@ -277,7 +278,7 @@ fun syncAppList(keyWord: String = "") {
     val list = ArrayList<String>()
     var cmd = "pm list packages -f"
     if (keyWord.isNotBlank()) {
-        cmd += " | grep -E '$keyWord'"
+        cmd += " findStr -E '$keyWord'"
     }
     CoroutineScope(Dispatchers.Default).launch{
         val packages = AdbUtil.shell(cmd,500)
