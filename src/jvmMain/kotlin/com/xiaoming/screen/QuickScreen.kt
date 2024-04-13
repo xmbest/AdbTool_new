@@ -278,7 +278,7 @@ fun syncAppList(keyWord: String = "") {
     val list = ArrayList<String>()
     var cmd = "pm list packages -f"
     if (keyWord.isNotBlank()) {
-        cmd += " findStr -E '$keyWord'"
+        cmd += "| grep -E '$keyWord'"
     }
     CoroutineScope(Dispatchers.Default).launch{
         val packages = AdbUtil.shell(cmd,500)

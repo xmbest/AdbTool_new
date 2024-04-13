@@ -1,11 +1,11 @@
 package com.xiaoming.utils
 
+import com.android.ddmlib.FileListingService
 import com.android.ddmlib.InstallReceiver
 import com.android.ddmlib.MultiLineReceiver
-import com.android.ddmlib.Timeout
-import com.xiaming.module.AdbModule
 import com.xiaoming.state.GlobalState
 import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -14,11 +14,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 object AdbUtil {
-    /**
-     * 执行shell命令
-     * @param cmd shell命令
-     * @param receiver 执行shell回调
-     */
+    private val log = LoggerFactory.getLogger(this.javaClass)
 
     /**
      * 无需结果的cmd命令
@@ -26,7 +22,7 @@ object AdbUtil {
      */
     fun shell(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            println(cmd)
+            log.debug("adb shell '$cmd'")
             GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
                 override fun isCancelled(): Boolean = false
                 override fun processNewLines(lines: Array<out String>?) {
@@ -51,17 +47,16 @@ object AdbUtil {
                     if (lines?.isNotEmpty() == true && isActive && !resume) {
                         resume = true
                         val str = lines.filter { line -> line.isNotEmpty() }.joinToString("\n")
-                        if (str.isNotBlank()){
+                        if (str.isNotBlank()) {
                             suspendSingle.resume(str)
-                            println("=======================")
-                            println(str)
+                            log.debug("adb shell '$cmd'\n$str")
                         }
                     }
                 }
             })
-            println(cmd)
             delay(timeMillis)
-            if (isActive && !resume){
+            if (isActive && !resume) {
+                log.debug("adb shell '$cmd' timout,timeout = $timeMillis")
                 resume = true
                 suspendSingle.resume("")
             }
@@ -106,6 +101,7 @@ object AdbUtil {
      */
     fun root() {
         CoroutineScope(Dispatchers.Default).launch {
+            log.debug("adb root")
             GlobalState.sCurrentDevice.value?.root()
         }
     }
@@ -115,6 +111,7 @@ object AdbUtil {
      */
     fun reboot() {
         CoroutineScope(Dispatchers.Default).launch {
+            log.debug("adb reboot")
             GlobalState.sCurrentDevice.value?.reboot("")
         }
     }
@@ -126,7 +123,7 @@ object AdbUtil {
     fun start(packageName: String) {
         CoroutineScope(Dispatchers.Default).launch {
             val launchActivity = getLaunchActivity(packageName)
-            println("am start packageName = $packageName,launchActivity = $launchActivity")
+            log.debug("am start packageName = $packageName,launchActivity = $launchActivity")
             if (launchActivity.isBlank()) shell("monkey -p $packageName -v 1") else shell("am start $launchActivity")
         }
     }
@@ -136,6 +133,7 @@ object AdbUtil {
      * @param packageName 包名
      */
     fun forceStop(packageName: String) {
+        log.debug("adb shell am force-stop $packageName")
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.forceStop(packageName)
         }
@@ -155,6 +153,7 @@ object AdbUtil {
      */
     fun uninstall(packageName: String) {
         CoroutineScope(Dispatchers.Default).launch {
+            log.debug("adb uninstall $packageName")
             GlobalState.sCurrentDevice.value?.uninstallPackage(packageName)
         }
     }
@@ -166,6 +165,7 @@ object AdbUtil {
      */
     fun install(packagePath: String, receiver: InstallReceiver? = null) {
         CoroutineScope(Dispatchers.Default).launch {
+            log.debug("adb install $packagePath")
             GlobalState.sCurrentDevice.value?.installPackage(packagePath, true, receiver)
         }
     }
@@ -177,6 +177,7 @@ object AdbUtil {
      */
     fun pull(remote: String, local: String) {
         CoroutineScope(Dispatchers.Default).launch {
+            log.debug("adb shell pull $remote $local")
             GlobalState.sCurrentDevice.value?.pullFile(remote, local)
         }
     }
@@ -188,6 +189,7 @@ object AdbUtil {
      */
     fun push(local: String, remote: String) {
         CoroutineScope(Dispatchers.Default).launch {
+            log.debug("adb shell push $local $remote")
             GlobalState.sCurrentDevice.value?.pushFile(local, remote)
         }
     }
@@ -249,6 +251,37 @@ object AdbUtil {
                     timeout
                 )
             it.resume(result)
+        }
+    }
+
+
+    /**
+     * 查找该${path}路径下的文件
+     * @param path 路径
+     * @param func 回调
+     */
+    fun findFileList(
+        path: String,
+        func: (FileListingService.FileEntry?, Array<out FileListingService.FileEntry>?) -> () -> Unit
+    ) {
+        GlobalState.sFileListingService.value?.let {
+            it.getChildren(
+                FileListingService.FileEntry(it.root, path, FileListingService.TYPE_DIRECTORY, false),
+                false,
+                object : FileListingService.IListingReceiver {
+                    override fun setChildren(
+                        entry: FileListingService.FileEntry?,
+                        children: Array<out FileListingService.FileEntry>?
+                    ) {
+                        func(entry, children)
+                    }
+
+                    override fun refreshEntry(entry: FileListingService.FileEntry?) {
+                        log.debug("refreshEntry")
+                    }
+
+                }
+            )
         }
     }
 

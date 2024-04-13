@@ -10,7 +10,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.xiaming.config.window_height
 import com.xiaming.config.window_width
-import com.xiaming.module.AdbModule
+import com.xiaoming.module.AdbModule
 import com.xiaming.utils.ImgUtil
 import com.xiaoming.router.Router
 import kotlinx.coroutines.CoroutineScope

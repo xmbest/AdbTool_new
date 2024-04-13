@@ -24,6 +24,7 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation("com.android.tools.ddms:ddmlib:31.3.1")
+                implementation("ch.qos.logback:logback-classic:1.2.3")
             }
         }
         val jvmTest by getting

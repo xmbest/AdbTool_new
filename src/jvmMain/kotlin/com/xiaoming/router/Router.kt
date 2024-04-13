@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.xiaming.module.AdbModule
+import com.xiaoming.module.AdbModule
 import com.xiaming.utils.ImgUtil.getRealLocation
 import com.xiaoming.componts.*
 import com.xiaoming.state.GlobalState

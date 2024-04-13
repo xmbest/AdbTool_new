@@ -1,6 +1,7 @@
-package com.xiaming.module
+package com.xiaoming.module
 
 import com.android.ddmlib.AndroidDebugBridge
+import com.android.ddmlib.FileListingService
 import com.android.ddmlib.IDevice
 import com.android.ddmlib.internal.DeviceImpl
 import com.xiaoming.entity.DeviceInfo
@@ -10,14 +11,16 @@ import com.xiaoming.utils.AdbUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import java.text.DecimalFormat
+import java.util.concurrent.TimeUnit
 
 /**
  * android ddmslib adb
  */
 object AdbModule {
-
-    fun convertKBToGB(size: String): String {
+    private val log = LoggerFactory.getLogger(this.javaClass)
+    private fun convertKBToGB(size: String): String {
         if (size.isBlank())
             return ""
         val df = DecimalFormat("0.00") //格式化小数
@@ -25,6 +28,7 @@ object AdbModule {
     }
 
     private fun loadDeviceInfo() {
+        log.debug("loadDeviceInfo")
         CoroutineScope(Dispatchers.Default).launch {
             val info = DeviceInfo()
             GlobalState.sCurrentDevice.value?.let {
@@ -59,12 +63,17 @@ object AdbModule {
      * @param device 切换的设备
      */
     fun changeDevice(device: IDevice?) {
-        if (device == null){
+        log.debug("changeDevice device = {}", device)
+        if (device == null) {
             deviceInfo.value = DeviceInfo()
             GlobalState.sCurrentDevice.value = null
-        }else{
+        } else {
             GlobalState.sCurrentDevice.value = device as DeviceImpl
             loadDeviceInfo()
+            GlobalState.sCurrentDevice.value?.let {
+                GlobalState.sFileListingService.value = FileListingService(it)
+            }
+
         }
     }
 
@@ -73,6 +82,7 @@ object AdbModule {
      * @param device 添加的设备
      */
     private fun addDevice(device: IDevice) {
+        log.debug("addDevice device = {}", device)
         GlobalState.sDeviceSet.add(device)
         //当前未选中设备时默认选中第一个
         if (GlobalState.sCurrentDevice.value == null) {
@@ -85,6 +95,7 @@ object AdbModule {
      * @param device 移出的设备
      */
     private fun removeDevice(device: IDevice) {
+        log.debug("removeDevice device = {}", device)
         if (GlobalState.sDeviceSet.contains(device))
             GlobalState.sDeviceSet.remove(device)
         GlobalState.sCurrentDevice.value.let { currentDevice ->
@@ -98,6 +109,7 @@ object AdbModule {
      * ddmslib 初始化
      */
     fun init() {
+        log.debug("init")
         AndroidDebugBridge.addDeviceChangeListener(object : AndroidDebugBridge.IDeviceChangeListener {
             override fun deviceConnected(device: IDevice?) {
                 device?.let {
@@ -127,6 +139,6 @@ object AdbModule {
 
         })
         AndroidDebugBridge.init(false)
-        AndroidDebugBridge.createBridge()
+        AndroidDebugBridge.createBridge(GlobalState.adb.value, true, 5000L, TimeUnit.MILLISECONDS)
     }
 }
