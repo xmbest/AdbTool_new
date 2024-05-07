@@ -15,14 +15,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.xiaming.utils.ImgUtil.getRealLocation
-import com.xiaoming.componts.*
+import com.xiaoming.widget.*
 import com.xiaoming.entity.DeviceInfo
 import com.xiaoming.entity.KeyMapper
+import com.xiaoming.state.GlobalState
 import com.xiaoming.utils.AdbUtil
+import com.xiaoming.utils.PathSelectorUtil
 import config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 import theme.GOOGLE_BLUE
 import theme.GOOGLE_GREEN
 import theme.GOOGLE_RED
@@ -33,9 +37,11 @@ val quickSettingKeyword = mutableStateOf("")
 val appList = mutableStateListOf<String>()
 val expanded = mutableStateOf(false)
 val deviceInfo = mutableStateOf(DeviceInfo())
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun QuickScreen() {
+    val log = LoggerFactory.getLogger("QuickScreen")
     val keyMapperList1 = listOf(
         KeyMapper(getRealLocation("task"), 187, "任务列表"),
         KeyMapper(getRealLocation("home"), 3, "回到桌面"),
@@ -124,12 +130,12 @@ fun QuickScreen() {
                         CoroutineScope(Dispatchers.Default).launch {
                             val str = AdbUtil.findCurrentActivity()
                             if (str.isNotBlank()) {
-                                SimpleDialog.info(str,"current activity:")
+                                SimpleDialog.info(str, "current activity:")
                             }
                         }
                     }
                     Item(keyMapperList4[1].icon, keyMapperList4[1].name, false) {
-                        SimpleDialog.confirm("是否清理logcat缓存"){
+                        SimpleDialog.confirm("是否清理logcat缓存") {
                             AdbUtil.shell("logcat -c")
                         }
                     }
@@ -137,7 +143,7 @@ fun QuickScreen() {
 
                     }
                     Item(keyMapperList4[3].icon, keyMapperList4[3].name, false) {
-                        SimpleDialog.confirm("是否重启设备"){
+                        SimpleDialog.confirm("是否重启设备") {
                             AdbUtil.reboot()
                         }
                     }
@@ -153,34 +159,56 @@ fun QuickScreen() {
                         }
                     }
                     Item(getRealLocation("power"), "停止运行", false) {
-                        SimpleDialog.confirm("是否停止运行 ${packageName.value}?"){
+                        SimpleDialog.confirm("是否停止运行 ${packageName.value}?") {
                             AdbUtil.forceStop(packageName.value)
                         }
                     }
                     Item(getRealLocation("clear"), "清除数据", false) {
-                        SimpleDialog.confirm("是否清除 ${packageName.value} 数据?"){
+                        SimpleDialog.confirm("是否清除 ${packageName.value} 数据?") {
                             AdbUtil.clear(packageName.value)
                         }
                     }
                     Item(getRealLocation("delete"), "卸载应用", false) {
-                        SimpleDialog.confirm("是否卸载应用 ${packageName.value}?"){
+                        SimpleDialog.confirm("是否卸载应用 ${packageName.value}?") {
                             AdbUtil.uninstall(packageName.value)
                         }
                     }
                 }
                 ContentNRow {
                     Item(getRealLocation("go"), "授予所有权限", false) {
-
+                        SimpleDialog.confirm("授予${packageName.value}应用所有权限?") {
+                            CoroutineScope(Dispatchers.Default).launch {
+                                AdbUtil.grant(packageName.value) {
+                                    log.debug("授予所有权限....")
+                                }
+                            }
+                        }
                     }
 
                     Item(getRealLocation("back"), "撤销所有权限", false) {
-
+                        SimpleDialog.confirm("撤销${packageName.value}应用所有权限?") {
+                            CoroutineScope(Dispatchers.Default).launch {
+                                AdbUtil.unGrant(packageName.value) {
+                                    log.debug("撤销所有权限....")
+                                }
+                            }
+                        }
                     }
 
                     Item(getRealLocation("eye"), "查看应用信息", false) {
-
+                        CoroutineScope(Dispatchers.Default).launch {
+                            val info = AdbUtil.dump(packageName.value, "version")
+                            SimpleDialog.info(info, "结果")
+                        }
                     }
+
                     Item(getRealLocation("save"), "保存程序到电脑", false) {
+                        runBlocking {
+                            if (packageName.value.isBlank()) return@runBlocking
+                            val selectDir = PathSelectorUtil.selectDir("请选择存储目录")
+                            val path = AdbUtil.path(packageName.value).split(":")[1]
+                            AdbUtil.pull(path, selectDir)
+                        }
                     }
                 }
             }
@@ -208,9 +236,9 @@ fun QuickScreen() {
                                 }
                             )
                             DropdownMenu(
-                                expanded = expanded.value ,
+                                expanded = expanded.value,
                                 onDismissRequest = {
-                                    expanded.value  = false
+                                    expanded.value = false
                                 },
                                 offset = DpOffset(x = 260.dp, y = 2.dp)
                             ) {
@@ -239,7 +267,7 @@ fun QuickScreen() {
                                 }
                                 if (appList.size == 0) {
                                     DropdownMenuItem(onClick = {
-                                        expanded.value  = false
+                                        expanded.value = false
                                     }) {
                                         Text(text = "未找到相关应用")
                                     }
@@ -280,8 +308,8 @@ fun syncAppList(keyWord: String = "") {
     if (keyWord.isNotBlank()) {
         cmd += "| grep -E '$keyWord'"
     }
-    CoroutineScope(Dispatchers.Default).launch{
-        val packages = AdbUtil.shell(cmd,500)
+    CoroutineScope(Dispatchers.Default).launch {
+        val packages = AdbUtil.shell(cmd, 500)
         val split = packages.split("\n").filter { it.isNotBlank() }.map { it.substring(8) }
         split.forEach {
             val index = it.lastIndexOf("=")

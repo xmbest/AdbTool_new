@@ -1,4 +1,4 @@
-package com.xiaoming.componts
+package com.xiaoming.widget
 
 import CustomDialogProvider
 import androidx.compose.foundation.layout.*

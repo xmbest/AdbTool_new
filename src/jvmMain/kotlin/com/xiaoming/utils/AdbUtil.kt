@@ -10,6 +10,7 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.imageio.ImageIO
+import javax.security.auth.callback.Callback
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -49,7 +50,7 @@ object AdbUtil {
                         val str = lines.filter { line -> line.isNotEmpty() }.joinToString("\n")
                         if (str.isNotBlank()) {
                             suspendSingle.resume(str)
-                            log.debug("adb shell '$cmd'\n$str")
+                            log.debug("adb shell \"$cmd\"\n$str")
                         }
                     }
                 }
@@ -176,10 +177,8 @@ object AdbUtil {
      * @param remote 目标调试设备路径
      */
     fun pull(remote: String, local: String) {
-        CoroutineScope(Dispatchers.Default).launch {
-            log.debug("adb shell pull $remote $local")
-            GlobalState.sCurrentDevice.value?.pullFile(remote, local)
-        }
+        log.debug("adb pull $remote $local")
+        GlobalState.sCurrentDevice.value?.pullFile(remote, local)
     }
 
     /**
@@ -194,6 +193,49 @@ object AdbUtil {
         }
     }
 
+    /**
+     * 对应用进行授权
+     * @param packageName 应用名称
+     * @callback 执行后回调
+     */
+    fun grant(packageName: String, callback: () -> Unit) {
+        findAllPermissionList(packageName) { it ->
+            it.forEach {
+                if (it.startsWith("android.permission"))
+                    grant(packageName, it)
+            }
+            callback.invoke()
+        }
+    }
+
+    /**
+     * 对应用进行取消授权
+     * @param packageName 应用名称
+     * @callback 执行后回调
+     */
+    fun unGrant(packageName: String, callback: () -> Unit) {
+        findAllPermissionList(packageName) { it ->
+            it.forEach {
+                if (it.startsWith("android.permission"))
+                    unGrant(packageName, it)
+            }
+            callback.invoke()
+        }
+    }
+
+    /**
+     * 对应用进行授权
+     * @param packageName 应用名称
+     * @param permission 权限名称
+     */
+    private fun grant(packageName: String, permission: String) {
+        shell("pm grant $packageName $permission")
+    }
+
+
+    private fun unGrant(packageName: String, permission: String) {
+        shell("pm revoke $packageName $permission")
+    }
 
     /**
      * 查找当前activity
@@ -210,6 +252,38 @@ object AdbUtil {
         }
     }
 
+
+    /**
+     * 查询应用所需权限
+     * @param packageName 包名
+     */
+    private fun findAllPermissionList(packageName: String, block: (Set<String>) -> Unit) {
+        val permissionSet: HashSet<String> = HashSet()
+        val permissionStr: ArrayList<String> = ArrayList()
+        GlobalState.sCurrentDevice.value?.executeShellCommand("pm dump $packageName", object : MultiLineReceiver() {
+            override fun isCancelled(): Boolean = false
+            override fun processNewLines(lines: Array<out String>?) {
+                lines?.let {
+                    permissionStr.addAll(it)
+                }
+            }
+
+            override fun done() {
+                super.done()
+                log.debug("findAllPermissionList done")
+                for (value in permissionStr) {
+                    if (value.contains("android.permission.")) {
+                        val permissionLine = value.replace(" ", "").split(":")
+                        if (permissionLine.isEmpty()) {
+                            continue
+                        }
+                        permissionSet.add(permissionLine[0])
+                    }
+                }
+                block.invoke(permissionSet)
+            }
+        })
+    }
 
     /**
      * 查找应用启动activity
@@ -238,6 +312,10 @@ object AdbUtil {
     }
 
 
+    suspend fun path(packageName: String): String {
+        return shell("pm path $packageName", 300)
+    }
+
     /**
      * dumpsys命令
      * @param packageName 包名
@@ -248,6 +326,23 @@ object AdbUtil {
             val result =
                 shell(
                     "dumpsys package $packageName${if (filter.isNotBlank()) " findStr -E '$filter'" else ""}",
+                    timeout
+                )
+            it.resume(result)
+        }
+    }
+
+
+    /**
+     * dump命令
+     * @param packageName 包名
+     * @param filter 过滤关键词
+     */
+    suspend fun dump(packageName: String, filter: String = "", timeout: Long = 300) = suspendCoroutine {
+        CoroutineScope(Dispatchers.Default).launch {
+            val result =
+                shell(
+                    "pm dump $packageName${if (filter.isNotBlank()) " | grep -E '$filter'" else ""}",
                     timeout
                 )
             it.resume(result)

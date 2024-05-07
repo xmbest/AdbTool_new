@@ -1,4 +1,4 @@
-package com.xiaoming.componts
+package com.xiaoming.widget
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
