@@ -359,6 +359,7 @@ object AdbUtil {
         path: String,
         func: (FileListingService.FileEntry?, Array<out FileListingService.FileEntry>?) -> () -> Unit
     ) {
+        log.debug("findFileList")
         GlobalState.sFileListingService.value?.let {
             it.getChildren(
                 FileListingService.FileEntry(it.root, path, FileListingService.TYPE_DIRECTORY, false),
@@ -368,7 +369,8 @@ object AdbUtil {
                         entry: FileListingService.FileEntry?,
                         children: Array<out FileListingService.FileEntry>?
                     ) {
-                        func(entry, children)
+                        func(entry, children).invoke()
+                        log.debug("func")
                     }
 
                     override fun refreshEntry(entry: FileListingService.FileEntry?) {
