@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.xiaoming.module.AdbModule
-import com.xiaming.utils.ImgUtil.getRealLocation
+import com.xiaoming.utils.ImgUtil.getRealLocation
 import com.xiaoming.widget.*
 import com.xiaoming.state.GlobalState
 import config.*
@@ -80,7 +80,7 @@ fun Left(modifier: Modifier) {
             ListItem(
                 text = {
                     Text(
-                        GlobalState.sCurrentDevice.value?.toString() ?: "请选择设备",
+                        GlobalState.sCurrentDevice.value?.serialNumber ?: "请选择设备",
                         color = route_left_item_color,
                         maxLines = 2
                     )
@@ -105,7 +105,7 @@ fun Left(modifier: Modifier) {
                 GlobalState.sExpanded.value = false
             },
             offset = DpOffset(x = 2.dp, y = 2.dp),
-            modifier = androidx.compose.ui.Modifier.width(route_left_width - route_left_padding_left - route_left_padding_right)
+            modifier = Modifier.width(route_left_width - route_left_padding_left - route_left_padding_right)
         ) {
             if (GlobalState.sDeviceSet.size == 0) {
                 DropdownMenuItem(onClick = {
@@ -119,7 +119,7 @@ fun Left(modifier: Modifier) {
                         GlobalState.sExpanded.value = false
                         AdbModule.changeDevice(it)
                     }) {
-                        Text(text = it.name)
+                        Text(text = it.serialNumber)
                     }
                 }
             }

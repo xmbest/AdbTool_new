@@ -1,5 +1,7 @@
 package com.xiaoming.entity
 
+import com.android.ddmlib.AdbHelper
+
 /**
  * model 代号
  * brand 手机品牌
@@ -16,4 +18,5 @@ package com.xiaoming.entity
  */
 data class DeviceInfo(var model:String = "", var brand:String = "", var device:String = "",
                       var serialNo:String = "", var density:String = "", var systemVersion:String = "",
-                      var androidVersion:String = "", var memory:String = "", var storage:String = "", var cpu:String = "",var core:String = "")
+                      var androidVersion:String = "", var memory:String = "", var storage:String = "", var cpu:String = "",var core:String = "",var ip:String = "")
+

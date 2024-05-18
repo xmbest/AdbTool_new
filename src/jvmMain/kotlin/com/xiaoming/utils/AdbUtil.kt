@@ -1,8 +1,6 @@
 package com.xiaoming.utils
 
-import com.android.ddmlib.FileListingService
-import com.android.ddmlib.InstallReceiver
-import com.android.ddmlib.MultiLineReceiver
+import com.android.ddmlib.*
 import com.xiaoming.state.GlobalState
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -10,12 +8,25 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.imageio.ImageIO
-import javax.security.auth.callback.Callback
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 object AdbUtil {
     private val log = LoggerFactory.getLogger(this.javaClass)
+
+
+    /**
+     * 执行在控制台命令
+     * @param cmd adb 后的命令 === adb cmd
+     */
+    private fun shellByProcess(cmd: String) {
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.let {
+                log.debug("adb -s $it $cmd")
+                BashUtil.execCommand("adb -s $it $cmd")
+            }
+        }
+    }
 
     /**
      * 无需结果的cmd命令
@@ -105,6 +116,14 @@ object AdbUtil {
             log.debug("adb root")
             GlobalState.sCurrentDevice.value?.root()
         }
+    }
+
+
+    /**
+     * tcpip
+     */
+    fun tcpip(port: String) {
+        shellByProcess("tcpip $port")
     }
 
     /**

@@ -31,18 +31,14 @@ object AdbModule {
         log.debug("loadDeviceInfo")
         CoroutineScope(Dispatchers.Default).launch {
             val info = DeviceInfo()
-            GlobalState.sCurrentDevice.value?.let {
+            GlobalState.sCurrentDevice.value?.let { it ->
                 it.serialNumber?.let { info.serialNo = it }
                 it.name.let { info.device = it }
-                AdbUtil.getProp("")
-                val res = AdbUtil.shell("wm size", 200)
-                val regex1 = Regex(pattern = """\d+x\d+""")
-                val regex2 = Regex(pattern = """\d+""")
-                info.memory = regex2.find(AdbUtil.shell("cat /proc/meminfo | grep MemTotal", 200))?.value ?: ""
-                info.memory = "≈ " + convertKBToGB(info.memory) + "GB"
-                info.density = regex1.find(res)?.value ?: ""
+                info.memory = AdbUtil.shell("cat /proc/meminfo | grep MemTotal | awk '{print \$2/1024}'", 200) + "MB"
+                info.density = AdbUtil.shell("wm size | awk '{print \$NF}'", 200)
                 it.density.let { info.density += "(dpi = $it)" }
-                info.cpu = it.getProperty("ro.product.cpu.abi") + "(size = " + AdbUtil.shell(
+                info.cpu = AdbUtil.shell("cat /proc/cpuinfo | grep Hardware | awk '{print \$NF}'",200)
+                info.cpu += "(" + it.getProperty("ro.product.cpu.abi") + ",core size = " + AdbUtil.shell(
                     "cat /proc/cpuinfo | grep processor | wc -l",
                     200
                 ) + ")"
@@ -53,6 +49,10 @@ object AdbModule {
                 }
                 info.model = it.getProperty("ro.product.model")
                 info.brand = it.getProperty("ro.product.brand")
+                info.ip = AdbUtil.shell("ifconfig wlan0 |  grep addr:1 |  awk  '{print \$2}'",200)
+                if (info.ip.contains(":")){
+                    info.ip  = info.ip.split(":")[1]
+                }
             }
             deviceInfo.value = info
         }
@@ -130,7 +130,7 @@ object AdbModule {
                             removeDevice(device)
                         }
                     } else {
-                        if (device.isOffline) {
+                        if (device.isOnline) {
                             addDevice(device)
                         }
                     }

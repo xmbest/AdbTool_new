@@ -22,9 +22,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.android.ddmlib.FileListingService
 import com.android.ddmlib.FileListingService.FileEntry
-import com.xiaming.utils.ImgUtil
+import com.xiaoming.utils.ImgUtil
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.utils.FileUtil
 import org.slf4j.LoggerFactory

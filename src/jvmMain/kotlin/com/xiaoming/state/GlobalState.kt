@@ -7,7 +7,7 @@ import com.android.ddmlib.internal.DeviceImpl
 import com.xiaming.screen.FileScreen
 import com.xiaming.screen.HomeScreen
 import com.xiaming.screen.SettingScreen
-import com.xiaming.utils.ImgUtil
+import com.xiaoming.utils.ImgUtil
 import com.xiaoming.entity.Page
 import com.xiaoming.screen.QuickScreen
 import javax.swing.filechooser.FileSystemView
@@ -33,6 +33,7 @@ object GlobalState{
     val sCurrentIndex = mutableStateOf(0)
     // 桌面位置
     val sHomePath = mutableStateOf(FileSystemView.getFileSystemView().homeDirectory.absolutePath)
-    //
+    // adb路径，配置环境变量即 adb
     val adb = mutableStateOf("adb")
+    val port = mutableStateOf("5555")
 }

@@ -1,20 +1,22 @@
 package com.xiaoming.screen
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.dp
-import com.xiaming.utils.ImgUtil.getRealLocation
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.*
+import com.xiaoming.utils.ImgUtil
+import com.xiaoming.utils.ImgUtil.getRealLocation
 import com.xiaoming.widget.*
 import com.xiaoming.entity.DeviceInfo
 import com.xiaoming.entity.KeyMapper
@@ -38,7 +40,7 @@ val appList = mutableStateListOf<String>()
 val expanded = mutableStateOf(false)
 val deviceInfo = mutableStateOf(DeviceInfo())
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalUnitApi::class)
 @Composable
 fun QuickScreen() {
     val log = LoggerFactory.getLogger("QuickScreen")
@@ -66,7 +68,7 @@ fun QuickScreen() {
     val keyMapperList4 = listOf(
         KeyMapper(getRealLocation("eye"), 1, "查看当前Activity"),
         KeyMapper(getRealLocation("delete"), 2, "清理logcat缓存"),
-        KeyMapper(getRealLocation("android"), 0, "挂载设备"),
+        KeyMapper(getRealLocation("android"), 0, "设置端口"),
         KeyMapper(getRealLocation("sync"), 0, "重启设备")
     )
     val scroll = rememberScrollState()
@@ -74,23 +76,41 @@ fun QuickScreen() {
     Column(modifier = Modifier.fillMaxSize().fillMaxHeight().verticalScroll(scroll)) {
 
         General(title = "系统信息", height = 2, color = GOOGLE_GREEN) {
-            Row(modifier = Modifier.fillMaxSize().padding(start = 20.dp, top = 20.dp)) {
-                Column(modifier = Modifier.weight(1f)) {
-                    SelectionContainer {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = painterResource(ImgUtil.getLogoByBrand(deviceInfo.value.brand)),
+                    "logo",
+                    alpha = 0.8f,
+                    modifier = Modifier.size(80.dp).padding(end = 20.dp, bottom = 10.dp).align(Alignment.BottomEnd)
+                )
+                Column(modifier = Modifier.fillMaxSize().padding(start = 20.dp, top = 10.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            "${deviceInfo.value.brand} ${deviceInfo.value.device} \n" +
-                                    "安卓版本: ${deviceInfo.value.androidVersion} \n" +
-                                    "系统版本: ${deviceInfo.value.systemVersion} \n" +
-                                    "代号: ${deviceInfo.value.model} \n" +
-                                    "处理器: ${deviceInfo.value.cpu} \n" +
-                                    "序列号: ${deviceInfo.value.serialNo} \n" +
-                                    "分辨率: ${deviceInfo.value.density} \n" +
-                                    "可用内存: ${deviceInfo.value.memory} \n"
+                            text = deviceInfo.value.device, style = TextStyle(
+                                fontWeight = FontWeight.W500, fontSize = TextUnit(
+                                    24f,
+                                    TextUnitType.Sp
+                                )
+                            )
                         )
                     }
+                    Row(modifier = Modifier.fillMaxWidth().fillMaxHeight(1f).padding(top = 10.dp)) {
+                        SelectionContainer {
+                            Text(
+                                "fingerprint:  ${deviceInfo.value.systemVersion} \n" +
+                                        "version:       ${deviceInfo.value.androidVersion} \n" +
+                                        "model:         ${deviceInfo.value.model} \n" +
+                                        "cpuinfo:       ${deviceInfo.value.cpu} \n" +
+                                        "serialNo:      ${deviceInfo.value.serialNo} \n" +
+                                        "density:       ${deviceInfo.value.density} \n" +
+                                        "memory:      ${deviceInfo.value.memory} \n" +
+                                        "ip:                ${deviceInfo.value.ip} \n"
+                            )
+                        }
+                    }
+
                 }
             }
-
         }
 
         General(title = "按键模拟", height = 4, content = {
@@ -140,7 +160,7 @@ fun QuickScreen() {
                         }
                     }
                     Item(keyMapperList4[2].icon, keyMapperList4[2].name, false) {
-
+                        AdbUtil.tcpip(GlobalState.port.value)
                     }
                     Item(keyMapperList4[3].icon, keyMapperList4[3].name, false) {
                         SimpleDialog.confirm("是否重启设备") {
