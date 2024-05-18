@@ -47,16 +47,12 @@ object ImgUtil {
         else if (fileName.endsWith(".so")) getRealLocation("dependency")
         else if (fileName.endsWith(".cfg") || fileName.endsWith(".conf")) getRealLocation("settings")
         else if (fileName.endsWith(".txt") || fileName.endsWith(".xml")) getRealLocation("file-text")
-        else if (fileName.endsWith(".png") || fileName.endsWith(".jpg")) getRealLocation("file-image")
-        else if (fileName.endsWith(".zip") || fileName.endsWith(".tar") || fileName.endsWith(".gz") || fileName.endsWith(
-                ".7z"
-            )
-        ) getRealLocation(
-            "file-zip"
-        )
-        else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav") || fileName.endsWith(".rf")) getRealLocation(
-            "music"
-        )
+        else if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".svg")) getRealLocation("file-image")
+        else if (fileName.endsWith(".zip") || fileName.endsWith(".tar") || fileName.endsWith(".gz") || fileName.endsWith(".7z"))
+            getRealLocation("file-zip")
+        else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav") || fileName.endsWith(".rf") || fileName.endsWith(".pcm") )
+            getRealLocation("music")
+        else if (fileName.endsWith(".mp4") || fileName.endsWith(".avi") || fileName.endsWith(".m3u8")) getRealLocation("movie")
         else getRealLocation("file")
     }
 }

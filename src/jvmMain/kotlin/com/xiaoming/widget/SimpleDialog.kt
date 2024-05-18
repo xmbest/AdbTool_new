@@ -93,7 +93,7 @@ object SimpleDialog {
      * @param text 错误信息
      */
     fun error(text: String) {
-        title.value = "异常"
+        title.value = "⚠️异常"
         titleColor.value = GOOGLE_RED
         needCancel.value = false
         contentText.value = text
@@ -106,9 +106,9 @@ object SimpleDialog {
      * 提示弹窗
      * @param text 错误信息
      */
-    fun info(text: String,titleText: String = "提示") {
+    fun info(text: String,titleText: String = "提示",titleTextColor: Color = GOOGLE_GREEN) {
         title.value = titleText
-        titleColor.value = GOOGLE_GREEN
+        titleColor.value = titleTextColor
         needCancel.value = false
         contentText.value = text
         callback.value = {}
@@ -121,7 +121,7 @@ object SimpleDialog {
      * @param block 点击确认后的回调
      */
     fun confirm(text: String, block: (() -> Unit)) {
-        title.value = "警告"
+        title.value = "⚠️警告"
         titleColor.value = GOOGLE_YELLOW
         needCancel.value = true
         contentText.value = text

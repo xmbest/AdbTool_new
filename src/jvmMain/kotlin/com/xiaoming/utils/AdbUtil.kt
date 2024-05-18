@@ -2,8 +2,10 @@ package com.xiaoming.utils
 
 import com.android.ddmlib.*
 import com.xiaoming.state.GlobalState
+import com.xiaoming.widget.SimpleDialog
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import theme.GOOGLE_YELLOW
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -14,6 +16,28 @@ import kotlin.coroutines.suspendCoroutine
 object AdbUtil {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
+    /**
+     * ⚠️危险目录
+     */
+    private val riskPathList =
+        listOf(
+            "/",
+            "/dev",
+            "/etc",
+            "/data",
+            "/sys",
+            "/system",
+            "/system_ext",
+            "/vendor",
+            "/system_dlkm",
+            "/storage",
+            "/config",
+            "/sdcard",
+            "/mnt",
+            "/init",
+            "/init.environ.rc",
+            "/init.recovery.qcom.rc",
+        )
 
     /**
      * 执行在控制台命令
@@ -22,8 +46,8 @@ object AdbUtil {
     private fun shellByProcess(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.let {
-                log.debug("adb -s $it $cmd")
-                BashUtil.execCommand("adb -s $it $cmd")
+                log.debug("${GlobalState.adb.value} -s $it $cmd")
+                BashUtil.execCommand("${GlobalState.adb.value} -s $it $cmd")
             }
         }
     }
@@ -38,6 +62,9 @@ object AdbUtil {
             GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
                 override fun isCancelled(): Boolean = false
                 override fun processNewLines(lines: Array<out String>?) {
+                    lines?.forEach {
+                        log.debug(it)
+                    }
                 }
             })
         }
@@ -77,6 +104,25 @@ object AdbUtil {
 
     fun getProp(key: String): String {
         return GlobalState.sCurrentDevice.value?.getProperty(key) ?: ""
+    }
+
+    /**
+     * 删除文件
+     * @param path 路径
+     */
+    fun rf(path: String) {
+        if (path.isBlank()) return
+        if (riskPathList.contains(path)) {
+            SimpleDialog.info(
+                text = "Deleting a `$path` is dangerous. Therefore, manually delete it",
+                titleText = "⚠️警告",
+                titleTextColor = GOOGLE_YELLOW
+            )
+            return
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            shell("rm -rf $path")
+        }
     }
 
 
@@ -190,14 +236,29 @@ object AdbUtil {
         }
     }
 
+
+    /**
+     * mv 命令
+     * @param start 开始路径
+     * @param end 目标路径
+     */
+    fun mv(start: String, end: String) {
+        GlobalState.sCurrentDevice.value?.let { device ->
+            CoroutineScope(Dispatchers.Default).launch {
+                shell("mv $start $end")
+            }
+        }
+    }
+
     /**
      * 拉取文件到本地
      * @param local 本地路径
      * @param remote 目标调试设备路径
      */
     fun pull(remote: String, local: String) {
-        log.debug("adb pull $remote $local")
-        GlobalState.sCurrentDevice.value?.pullFile(remote, local)
+//        ddms#push only handle file
+//        GlobalState.sCurrentDevice.value?.pullFile(remote, local)
+        shellByProcess("pull $remote $local/")
     }
 
     /**
@@ -207,8 +268,8 @@ object AdbUtil {
      */
     fun push(local: String, remote: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            log.debug("adb shell push $local $remote")
-            GlobalState.sCurrentDevice.value?.pushFile(local, remote)
+//            GlobalState.sCurrentDevice.value?.pushFile(local, remote)
+            shellByProcess("push $local $remote/")
         }
     }
 
@@ -381,7 +442,12 @@ object AdbUtil {
         log.debug("findFileList")
         GlobalState.sFileListingService.value?.let {
             it.getChildren(
-                FileListingService.FileEntry(it.root, path, FileListingService.TYPE_DIRECTORY, false),
+                if (path.isEmpty()) it.root else FileListingService.FileEntry(
+                    it.root,
+                    path,
+                    FileListingService.TYPE_DIRECTORY,
+                    false
+                ),
                 false,
                 object : FileListingService.IListingReceiver {
                     override fun setChildren(

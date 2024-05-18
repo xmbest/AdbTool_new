@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.android.ddmlib.FileListingService
 import com.android.ddmlib.IDevice
 import com.android.ddmlib.internal.DeviceImpl
-import com.xiaming.screen.FileScreen
+import com.xiaoming.screen.FileScreen
 import com.xiaming.screen.HomeScreen
 import com.xiaming.screen.SettingScreen
 import com.xiaoming.utils.ImgUtil

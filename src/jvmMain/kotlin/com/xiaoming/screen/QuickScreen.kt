@@ -68,8 +68,8 @@ fun QuickScreen() {
     val keyMapperList4 = listOf(
         KeyMapper(getRealLocation("eye"), 1, "查看当前Activity"),
         KeyMapper(getRealLocation("delete"), 2, "清理logcat缓存"),
-        KeyMapper(getRealLocation("android"), 0, "设置端口"),
-        KeyMapper(getRealLocation("sync"), 0, "重启设备")
+        KeyMapper(getRealLocation("open"), 0, "设置端口"),
+        KeyMapper(getRealLocation("reboot"), 0, "重启设备")
     )
     val scroll = rememberScrollState()
 
@@ -85,14 +85,16 @@ fun QuickScreen() {
                 )
                 Column(modifier = Modifier.fillMaxSize().padding(start = 20.dp, top = 10.dp)) {
                     Row(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = deviceInfo.value.device, style = TextStyle(
-                                fontWeight = FontWeight.W500, fontSize = TextUnit(
-                                    24f,
-                                    TextUnitType.Sp
+                        SelectionContainer {
+                            Text(
+                                text = deviceInfo.value.device, style = TextStyle(
+                                    fontWeight = FontWeight.W500, fontSize = TextUnit(
+                                        24f,
+                                        TextUnitType.Sp
+                                    )
                                 )
                             )
-                        )
+                        }
                     }
                     Row(modifier = Modifier.fillMaxWidth().fillMaxHeight(1f).padding(top = 10.dp)) {
                         SelectionContainer {
@@ -222,12 +224,14 @@ fun QuickScreen() {
                         }
                     }
 
-                    Item(getRealLocation("save"), "保存程序到电脑", false) {
+                    Item(getRealLocation("download"), "保存程序到电脑", false) {
                         runBlocking {
                             if (packageName.value.isBlank()) return@runBlocking
                             val selectDir = PathSelectorUtil.selectDir("请选择存储目录")
                             val path = AdbUtil.path(packageName.value).split(":")[1]
-                            AdbUtil.pull(path, selectDir)
+                            if (selectDir.isNotEmpty()) {
+                                AdbUtil.pull(path, selectDir)
+                            }
                         }
                     }
                 }

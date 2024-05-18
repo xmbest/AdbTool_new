@@ -22,16 +22,18 @@ import config.*
 @Composable
 fun Router() {
     Row(modifier = Modifier.fillMaxSize()) {
-        Left(Modifier.fillMaxHeight().width(route_left_width).background(route_left_background).padding(
-            start = route_left_padding_left,
-            end = route_left_padding_right,
-            top = route_left_padding_top,
-            bottom = route_left_padding_bottom
-        ))
+        Left(
+            Modifier.fillMaxHeight().width(route_left_width).background(route_left_background).padding(
+                start = route_left_padding_left,
+                end = route_left_padding_right,
+                top = route_left_padding_top,
+                bottom = route_left_padding_bottom
+            )
+        )
         Right(Modifier.fillMaxHeight().weight(1f).background(route_right_background))
     }
     //显示
-    Box(modifier = Modifier.fillMaxSize()){
+    Box(modifier = Modifier.fillMaxSize()) {
         if (showingSimpleDialog.value) {
             SimpleDialog(
                 title = title.value,
@@ -39,6 +41,15 @@ fun Router() {
                 contentText = contentText.value,
                 needCancel = needCancel.value,
                 callback = callback.value
+            )
+        }
+
+        if (showingInputDialog.value) {
+            InputDialog(
+                title = inputTitleText.value,
+                titleColor = inputTitleColor.value,
+                hint = inputHintText.value,
+                runnable = inputCallback.value,
             )
         }
     }
@@ -70,7 +81,8 @@ fun Left(modifier: Modifier) {
                     .height(route_left_item_height)
                     .clickable {
                         GlobalState.sCurrentIndex.value = index
-                    }.background(if (GlobalState.sCurrentIndex.value == index) route_left_item_background else route_left_background)
+                    }
+                    .background(if (GlobalState.sCurrentIndex.value == index) route_left_item_background else route_left_background)
             )
         }
         Row(

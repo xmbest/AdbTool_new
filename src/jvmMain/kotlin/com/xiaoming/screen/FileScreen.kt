@@ -1,4 +1,4 @@
-package com.xiaming.screen
+package com.xiaoming.screen
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -23,9 +23,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.ddmlib.FileListingService.FileEntry
-import com.xiaoming.utils.ImgUtil
-import com.xiaoming.utils.AdbUtil
-import com.xiaoming.utils.FileUtil
+import com.xiaoming.state.GlobalState
+import com.xiaoming.utils.*
+import com.xiaoming.widget.InputDialog
+import com.xiaoming.widget.SimpleDialog
+import com.xiaoming.widget.inputText
+import com.xiaoming.widget.showingInputDialog
+import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import theme.*
 
@@ -44,20 +48,30 @@ private val currentPath = mutableStateOf("sdcard")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FileScreen() {
-    LaunchedEffect(currentPath.value) {
-        findFile()
-    }
-
-    LazyColumn {
-        stickyHeader {
-            Row(modifier = Modifier.background(Color.White)) {
-                FileNav()
+    if (GlobalState.sCurrentDevice.value == null) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("请先连接设备")
+        }
+    } else {
+        LaunchedEffect(currentPath.value) {
+            findFile()
+        }
+        LazyColumn {
+            stickyHeader {
+                Row(modifier = Modifier.background(Color.White)) {
+                    FileNav()
+                }
+            }
+            items(fileList) {
+                FileView(it)
             }
         }
-        items(fileList) {
-            FileView(it)
-        }
     }
+
 
 }
 
@@ -112,9 +126,10 @@ fun FileNav(
     }
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 5.dp, start = 10.dp).background(Color.White).clip(
-            RoundedCornerShape(5.dp)
-        ).combinedClickable(onDoubleClick = { block() }, onClick = {}),
+        modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 5.dp, start = 10.dp).background(Color.White)
+            .clip(
+                RoundedCornerShape(5.dp)
+            ).combinedClickable(onDoubleClick = { block() }, onClick = {}),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -137,6 +152,7 @@ fun FileNav(
                 Text("back", fontSize = 12.sp, color = SIMPLE_GRAY)
             }
         }
+        FileTool(path = "/" + currentPath.value, isParentTool = true)
     }
 }
 
@@ -153,9 +169,10 @@ fun FileView(
     }
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 5.dp, start = 10.dp).background(Color.White).clip(
-            RoundedCornerShape(5.dp)
-        ).combinedClickable(onDoubleClick = { block() }, onClick = {}),
+        modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 5.dp, start = 10.dp).background(Color.White)
+            .clip(
+                RoundedCornerShape(5.dp)
+            ).combinedClickable(onDoubleClick = { block() }, onClick = {}),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -178,15 +195,134 @@ fun FileView(
                 }
             }
             Row {
-                Text(file.date, fontSize = 12.sp, color = SIMPLE_GRAY)
+                Text(file.date + " " + file.time, fontSize = 12.sp, color = SIMPLE_GRAY)
                 Text(
-                    FileUtil.byte2Gb(file.sizeValue),
+                    FileUtil.byte2Gb(file.size),
                     fontSize = 12.sp,
                     color = SIMPLE_GRAY,
                     modifier = Modifier.padding(start = 5.dp)
                 )
             }
         }
+        FileTool(file.fullPath, parentPath = file.parent.fullPath, name = file.name, isParentTool = false)
     }
 }
+
+
+/**
+ * 文件工具栏
+ */
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FileTool(path: String, parentPath: String? = "", name: String = "", isParentTool: Boolean = false) {
+    TooltipArea(tooltip = {
+        Text("copy absolutePath")
+    }) {
+        Icon(
+            painter = painterResource(ImgUtil.getRealLocation("copy")),
+            "icon",
+            tint = GOOGLE_BLUE,
+            modifier = Modifier.size(50.dp).clickable {
+                ClipboardUtils.setSysClipboardText(path)
+            }.padding(10.dp)
+        )
+    }
+
+    if (isParentTool) {
+        Spacer(modifier = Modifier.width(10.dp))
+        TooltipArea(tooltip = {
+            Text("refresh")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("reload")),
+                null,
+                modifier = Modifier.size(50.dp).clickable {
+                    findFile()
+                }.padding(10.dp),
+                tint = GOOGLE_BLUE
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        TooltipArea(tooltip = {
+            Text("push file")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("upload")),
+                null,
+                modifier = Modifier.size(50.dp).clickable {
+                    runBlocking {
+                        val selectDir = PathSelectorUtil.selectFileOrDir("请选择需要上传的文件、目录")
+                        if (selectDir.isNotEmpty()) {
+                            AdbUtil.push(selectDir, path)
+                        }
+                    }
+                }.padding(10.dp),
+                tint = GOOGLE_BLUE
+            )
+        }
+    } else {
+        TooltipArea(tooltip = {
+            Text("rename")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("rename")),
+                "icon",
+                tint = GOOGLE_BLUE,
+                modifier = Modifier.size(50.dp).clickable {
+                    inputText.value = name
+                    InputDialog.confirm(hint = "请输入新文件名称", title = "重命名") {
+                        if (inputText.value.isEmpty() || inputText.value == name) {
+                            // 不可为空
+                            return@confirm
+                        }
+                        val filterList = fileList.filter { it.name == inputText.value }
+                        if (filterList.isNotEmpty()) {
+                            // 重复
+                            return@confirm
+                        }
+                        AdbUtil.mv(path, parentPath + "/" + inputText.value)
+                        showingInputDialog.value = false
+                    }
+                }.padding(10.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        TooltipArea(tooltip = {
+            Text("pull file")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("download")),
+                null,
+                modifier = Modifier.size(50.dp).clickable {
+                    runBlocking {
+                        if (path.isBlank()) return@runBlocking
+                        val selectDir = PathSelectorUtil.selectDir("请选择存储目录")
+                        if (selectDir.isNotEmpty()) {
+                            AdbUtil.pull(path, selectDir)
+                        }
+                    }
+                }.padding(10.dp),
+                tint = GOOGLE_BLUE
+            )
+        }
+    }
+
+    TooltipArea(tooltip = {
+        Text("delete")
+    }) {
+        Icon(
+            painter = painterResource(ImgUtil.getRealLocation("delete")),
+            "icon",
+            tint = GOOGLE_RED,
+            modifier = Modifier.size(50.dp).clickable {
+                SimpleDialog.confirm("是否删除 `${path}`") {
+                    AdbUtil.rf(path)
+                }
+            }.padding(10.dp)
+        )
+        Spacer(modifier = Modifier.width(15.dp))
+    }
+}
+
 
