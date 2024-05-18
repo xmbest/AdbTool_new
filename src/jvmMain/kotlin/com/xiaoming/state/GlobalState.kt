@@ -17,9 +17,9 @@ object GlobalState{
     val pages = listOf(
         Page("快捷功能", ImgUtil.getRealLocation("pin")) { QuickScreen() },
         Page("文件管理", ImgUtil.getRealLocation("folder")) { FileScreen() },
-        Page("应用管理", ImgUtil.getRealLocation("pin")) { HomeScreen() },
-        Page("广播模拟", ImgUtil.getRealLocation("pin")) { HomeScreen() },
-        Page("程序设置", ImgUtil.getRealLocation("pin")) { SettingScreen() }
+        Page("应用管理", ImgUtil.getRealLocation("android")) { HomeScreen() },
+        Page("广播模拟", ImgUtil.getRealLocation("board")) { HomeScreen() },
+        Page("程序设置", ImgUtil.getRealLocation("settings")) { SettingScreen() }
     )
     // 已连接设备列表
     val sDeviceSet = mutableSetOf<IDevice>()

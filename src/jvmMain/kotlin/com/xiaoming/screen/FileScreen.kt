@@ -8,14 +8,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -29,6 +30,7 @@ import com.xiaoming.widget.InputDialog
 import com.xiaoming.widget.SimpleDialog
 import com.xiaoming.widget.inputText
 import com.xiaoming.widget.showingInputDialog
+import config.route_left_item_color
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import theme.*
@@ -44,8 +46,10 @@ private val fileList = mutableStateListOf<FileEntry>()
  * 当前文件夹路径
  */
 private val currentPath = mutableStateOf("sdcard")
+private val requester = FocusRequester()
+private var filter = mutableStateOf("")
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun FileScreen() {
     if (GlobalState.sCurrentDevice.value == null) {
@@ -60,15 +64,71 @@ fun FileScreen() {
         LaunchedEffect(currentPath.value) {
             findFile()
         }
-        LazyColumn {
-            stickyHeader {
-                Row(modifier = Modifier.background(Color.White)) {
-                    FileNav()
+        Box(modifier = Modifier.fillMaxSize().onKeyEvent {
+            if ((it.isCtrlPressed || it.isMetaPressed)&& it.key.keyCode == Key.N.keyCode) {
+                log.debug("ctrl + n")
+                return@onKeyEvent true
+            }
+            if ((it.isCtrlPressed || it.isMetaPressed) && it.key.keyCode == Key.C.keyCode) {
+                log.debug("ctrl + c")
+                ClipboardUtils.setSysClipboardText("/" + currentPath.value)
+                return@onKeyEvent true
+            }
+            if (it.isCtrlPressed || it.isMetaPressed) {
+                log.debug("filter ctrl、window、command")
+                return@onKeyEvent true
+            }
+            if (it.type == KeyEventType.KeyDown) {
+                if (it.key.keyCode >= Key.A.keyCode && it.key.keyCode <= Key.Z.keyCode) {
+                    filter.value += Char(it.key.nativeKeyCode).lowercase()
+                } else if (it.key.keyCode == Key.Backspace.keyCode) {
+                    if (filter.value.isNotBlank())
+                        filter.value = filter.value.substring(0, filter.value.length - 1)
+                } else if (it.key.keyCode == Key.Delete.keyCode) {
+                    deleteFile("/${currentPath.value}/")
+                    return@onKeyEvent true
+                } else if (it.key.keyCode == Key.F5.keyCode) {
+                    findFile()
+                    return@onKeyEvent true
+                } else if (it.key.keyCode == Key.Escape.keyCode) {
+                    if (filter.value.isBlank()) {
+                        log.debug("backParent Esc")
+                        backParent()
+                        return@onKeyEvent true
+                    } else {
+                        filter.value = ""
+                    }
+                }
+                findFile()
+                true
+            } else {
+                false
+            }
+        }.focusRequester(requester).focusable()) {
+            LazyColumn {
+                stickyHeader {
+                    Row(modifier = Modifier.background(Color.White)) {
+                        FileNav()
+                    }
+                }
+                items(fileList) {
+                    FileView(it)
                 }
             }
-            items(fileList) {
-                FileView(it)
+            Row(
+                modifier = Modifier.background(if (filter.value.isEmpty()) Color.Transparent else route_left_item_color)
+                    .align(alignment = Alignment.TopStart), verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = filter.value,
+                    color = SIMPLE_WHITE,
+                    modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 3.dp, bottom = 3.dp)
+                )
             }
+        }
+        SideEffect {
+            // 直接在重组完成后请求Box的焦点
+            requester.requestFocus()
         }
     }
 
@@ -83,7 +143,7 @@ fun findFile() {
     AdbUtil.findFileList(currentPath.value) { entry, children ->
         {
             fileList.clear()
-            children?.forEach {
+            children?.filter { it.name.contains(filter.value, true) }?.forEach {
                 log.debug("${it.fullPath}")
                 fileList.add(it)
             }
@@ -258,7 +318,7 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
                         }
                     }
                 }.padding(10.dp),
-                tint = GOOGLE_BLUE
+                tint = GOOGLE_YELLOW
             )
         }
     } else {
@@ -268,7 +328,7 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
             Icon(
                 painter = painterResource(ImgUtil.getRealLocation("rename")),
                 "icon",
-                tint = GOOGLE_BLUE,
+                tint = GOOGLE_YELLOW,
                 modifier = Modifier.size(50.dp).clickable {
                     inputText.value = name
                     InputDialog.confirm(hint = "请输入新文件名称", title = "重命名") {
@@ -303,7 +363,7 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
                         }
                     }
                 }.padding(10.dp),
-                tint = GOOGLE_BLUE
+                tint = GOOGLE_GREEN
             )
         }
     }
@@ -316,12 +376,16 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
             "icon",
             tint = GOOGLE_RED,
             modifier = Modifier.size(50.dp).clickable {
-                SimpleDialog.confirm("是否删除 `${path}`") {
-                    AdbUtil.rf(path)
-                }
+                deleteFile(path + if (isParentTool) "/" else "")
             }.padding(10.dp)
         )
         Spacer(modifier = Modifier.width(15.dp))
+    }
+}
+
+fun deleteFile(path: String) {
+    SimpleDialog.confirm("是否删除 `${path}`") {
+        AdbUtil.rf(path)
     }
 }
 
