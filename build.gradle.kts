@@ -33,6 +33,13 @@ kotlin {
 
 compose.desktop {
     application {
+        nativeDistributions{
+            includeAllModules = true
+        }
+        buildTypes.release.proguard {
+            isEnabled.set(false)
+            obfuscate.set(false)
+        }
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
