@@ -65,7 +65,7 @@ fun FileScreen() {
             findFile()
         }
         Box(modifier = Modifier.fillMaxSize().onKeyEvent {
-            if ((it.isCtrlPressed || it.isMetaPressed)&& it.key.keyCode == Key.N.keyCode) {
+            if ((it.isCtrlPressed || it.isMetaPressed) && it.key.keyCode == Key.N.keyCode) {
                 log.debug("ctrl + n")
                 return@onKeyEvent true
             }
@@ -148,6 +148,14 @@ fun findFile() {
                 fileList.add(it)
             }
         }
+    }
+}
+
+
+fun findFile(time:Long){
+    CoroutineScope(Dispatchers.Default).launch {
+        delay(time)
+        findFile()
     }
 }
 
@@ -305,6 +313,50 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
         }
         Spacer(modifier = Modifier.width(10.dp))
         TooltipArea(tooltip = {
+            Text("new file")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("file-add")),
+                null,
+                modifier = Modifier.size(50.dp).clickable {
+                    inputText.value = ""
+                    InputDialog.confirm("创建新文件", hint = "请输入文件名称") {
+                        if (inputText.value.isNotBlank()) {
+                            AdbUtil.touch(path = path + "/${inputText.value}")
+                            showingInputDialog.value = false
+                            findFile(200)
+                        }else{
+
+                        }
+                    }
+                }.padding(10.dp),
+                tint = GOOGLE_BLUE
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        TooltipArea(tooltip = {
+            Text("new folder")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("folder-add")),
+                null,
+                modifier = Modifier.size(50.dp).clickable {
+                    inputText.value = ""
+                    InputDialog.confirm("创建文件夹", hint = "请输入文件夹名称") {
+                        if (inputText.value.isNotBlank()) {
+                            AdbUtil.mkdir(path = path + "/${inputText.value}",777)
+                            showingInputDialog.value = false
+                            findFile(200)
+                        }else{
+
+                        }
+                    }
+                }.padding(10.dp),
+                tint = GOOGLE_GREEN
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        TooltipArea(tooltip = {
             Text("push file")
         }) {
             Icon(
@@ -343,6 +395,7 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
                         }
                         AdbUtil.mv(path, parentPath + "/" + inputText.value)
                         showingInputDialog.value = false
+                        findFile(200)
                     }
                 }.padding(10.dp)
             )
@@ -377,6 +430,7 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
             tint = GOOGLE_RED,
             modifier = Modifier.size(50.dp).clickable {
                 deleteFile(path + if (isParentTool) "/" else "")
+                findFile(200)
             }.padding(10.dp)
         )
         Spacer(modifier = Modifier.width(15.dp))

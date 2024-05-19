@@ -250,6 +250,47 @@ object AdbUtil {
         }
     }
 
+
+    /**
+     * touch 命令
+     * @param path 文件路径
+     */
+    fun touch(path: String) {
+        GlobalState.sCurrentDevice.value?.let {
+            CoroutineScope(Dispatchers.Default).launch {
+                shell("touch $path")
+            }
+        }
+    }
+
+    /**
+     * mkdir命令
+     * @param path 文件路径
+     * @param auth 权限
+     */
+    fun mkdir(path: String, auth: Int) {
+        GlobalState.sCurrentDevice.value?.let {
+            CoroutineScope(Dispatchers.Default).launch {
+                shell("mkdir -m $auth $path")
+            }
+        }
+    }
+
+
+    /**
+     * mkdir命令
+     * @param path 文件路径
+     * @param auth 权限
+     */
+    fun chmod(path: String, auth: Int) {
+        GlobalState.sCurrentDevice.value?.let {
+            CoroutineScope(Dispatchers.Default).launch {
+                shell("chmod $auth $path")
+            }
+        }
+    }
+
+
     /**
      * 拉取文件到本地
      * @param local 本地路径
