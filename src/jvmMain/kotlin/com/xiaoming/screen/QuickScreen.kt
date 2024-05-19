@@ -13,7 +13,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.*
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.utils.ImgUtil.getRealLocation
@@ -36,7 +35,7 @@ import javax.swing.filechooser.FileSystemView
 
 val packageName = mutableStateOf("")
 val quickSettingKeyword = mutableStateOf("")
-val appList = mutableStateListOf<String>()
+val quickAppList = mutableStateListOf<String>()
 val expanded = mutableStateOf(false)
 val deviceInfo = mutableStateOf(DeviceInfo())
 
@@ -75,7 +74,9 @@ fun QuickScreen() {
 
     Column(modifier = Modifier.fillMaxSize().fillMaxHeight().verticalScroll(scroll)) {
 
-        General(title = "系统信息", height = 2, color = GOOGLE_GREEN) {
+        General(title = "系统信息", height = 2, color = GOOGLE_GREEN, topRight = {
+            Text(deviceInfo.value.brand)
+        }) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(
                     painter = painterResource(ImgUtil.getLogoByBrand(deviceInfo.value.brand)),
@@ -289,14 +290,14 @@ fun QuickScreen() {
                                             .padding(end = 10.dp, start = 10.dp)
                                     )
                                 }
-                                if (appList.size == 0) {
+                                if (quickAppList.size == 0) {
                                     DropdownMenuItem(onClick = {
                                         expanded.value = false
                                     }) {
                                         Text(text = "未找到相关应用")
                                     }
                                 } else {
-                                    appList.forEach {
+                                    quickAppList.forEach {
                                         DropdownMenuItem(onClick = {
                                             expanded.value = false
                                             packageName.value = it
@@ -340,7 +341,7 @@ fun syncAppList(keyWord: String = "") {
             val packageName = it.substring(index + 1)
             list.add(packageName)
         }
-        appList.clear()
-        appList.addAll(list)
+        quickAppList.clear()
+        quickAppList.addAll(list)
     }
 }

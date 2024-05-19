@@ -5,11 +5,10 @@ import com.android.ddmlib.FileListingService
 import com.android.ddmlib.IDevice
 import com.android.ddmlib.internal.DeviceImpl
 import com.xiaoming.screen.FileScreen
-import com.xiaming.screen.HomeScreen
 import com.xiaming.screen.SettingScreen
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.entity.Page
-import com.xiaoming.screen.AppScreen
+import com.xiaoming.screen.TaskScreen
 import com.xiaoming.screen.BroadcastScreen
 import com.xiaoming.screen.QuickScreen
 import javax.swing.filechooser.FileSystemView
@@ -19,7 +18,7 @@ object GlobalState{
     val pages = listOf(
         Page("快捷功能", ImgUtil.getRealLocation("pin")) { QuickScreen() },
         Page("文件管理", ImgUtil.getRealLocation("folder")) { FileScreen() },
-        Page("应用管理", ImgUtil.getRealLocation("android")) { AppScreen() },
+        Page("进程管理", ImgUtil.getRealLocation("android")) { TaskScreen() },
         Page("广播模拟", ImgUtil.getRealLocation("broadcast")) { BroadcastScreen() },
         Page("程序设置", ImgUtil.getRealLocation("settings")) { SettingScreen() }
     )

@@ -37,7 +37,7 @@ object AdbModule {
                 info.memory = AdbUtil.shell("cat /proc/meminfo | grep MemTotal | awk '{print \$2/1024}'", 200) + "MB"
                 info.density = AdbUtil.shell("wm size | awk '{print \$NF}'", 200)
                 it.density.let { info.density += "(dpi = $it)" }
-                info.cpu = AdbUtil.shell("cat /proc/cpuinfo | grep Hardware | awk '{print \$NF}'",200)
+                info.cpu = AdbUtil.getProp("ro.soc.model")
                 info.cpu += "(" + it.getProperty("ro.product.cpu.abi") + ",core size = " + AdbUtil.shell(
                     "cat /proc/cpuinfo | grep processor | wc -l",
                     200

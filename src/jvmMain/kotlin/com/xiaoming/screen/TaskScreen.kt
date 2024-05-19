@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import com.xiaoming.state.GlobalState
 
 @Composable
-fun AppScreen() {
+fun TaskScreen() {
     if (GlobalState.sCurrentDevice.value == null) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -21,8 +21,15 @@ fun AppScreen() {
             Text("请先连接设备")
         }
     } else {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("待开发")
+        }
         LaunchedEffect("") {
-            //TODO 刷新
+
         }
     }
 }
