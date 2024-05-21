@@ -480,7 +480,7 @@ object AdbUtil {
         path: String,
         func: (FileListingService.FileEntry?, Array<out FileListingService.FileEntry>?) -> () -> Unit
     ) {
-        log.debug("findFileList")
+        log.debug("findFileList path = $path")
         GlobalState.sFileListingService.value?.let {
             it.getChildren(
                 if (path.isEmpty()) it.root else FileListingService.FileEntry(
@@ -496,7 +496,6 @@ object AdbUtil {
                         children: Array<out FileListingService.FileEntry>?
                     ) {
                         func(entry, children).invoke()
-                        log.debug("func")
                     }
 
                     override fun refreshEntry(entry: FileListingService.FileEntry?) {

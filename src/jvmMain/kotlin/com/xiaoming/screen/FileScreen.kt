@@ -142,9 +142,9 @@ fun FileScreen() {
 fun findFile() {
     AdbUtil.findFileList(currentPath.value) { entry, children ->
         {
+            log.debug("findFile callback")
             fileList.clear()
             children?.filter { it.name.contains(filter.value, true) }?.forEach {
-                log.debug("${it.fullPath}")
                 fileList.add(it)
             }
         }
@@ -181,7 +181,6 @@ fun changePath(path: String) {
     while (temp.startsWith("/")) {
         temp = temp.removePrefix("/")
     }
-    log.debug("temp = $temp")
     currentPath.value = temp
 }
 
