@@ -41,7 +41,7 @@ fun main() = application {
     val state = rememberWindowState(width = width.dp, height = height.dp, position = WindowPosition(x.dp, y.dp))
     Window(
         onCloseRequest = ::exitApplication,
-        title = "ADBTool By Desktop",
+        title = "AdbTool By Desktop",
         state = state,
         icon = painterResource(ImgUtil.getLogoByBrand(""))
     ) {

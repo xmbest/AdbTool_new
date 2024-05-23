@@ -34,11 +34,10 @@ kotlin {
 compose.desktop {
     application {
         nativeDistributions{
-            includeAllModules = true
+            modules("java.compiler", "java.instrument", "java.management", "java.naming", "java.sql", "jdk.unsupported")
         }
         buildTypes.release.proguard {
             isEnabled.set(false)
-            obfuscate.set(false)
         }
         mainClass = "MainKt"
         nativeDistributions {
