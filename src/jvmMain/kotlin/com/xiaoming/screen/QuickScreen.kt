@@ -21,6 +21,7 @@ import com.xiaoming.entity.DeviceInfo
 import com.xiaoming.entity.KeyMapper
 import com.xiaoming.state.GlobalState
 import com.xiaoming.utils.AdbUtil
+import com.xiaoming.utils.ClipboardUtils
 import com.xiaoming.utils.PathSelectorUtil
 import config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
@@ -168,6 +169,7 @@ fun QuickScreen() {
                     Item(keyMapperList4[3].icon, keyMapperList4[3].name, false) {
                         SimpleDialog.confirm("是否重启设备") {
                             AdbUtil.reboot()
+                            Toast.show("重启中....")
                         }
                     }
                 }
@@ -177,61 +179,77 @@ fun QuickScreen() {
             ContentMoreRowColumn {
                 ContentNRow {
                     Item(getRealLocation("start"), "启动应用") {
-                        applicationManager {
+                        conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
                             AdbUtil.start(packageName.value)
                         }
                     }
                     Item(getRealLocation("power"), "停止运行", false) {
-                        SimpleDialog.confirm("是否停止运行 ${packageName.value}?") {
-                            AdbUtil.forceStop(packageName.value)
+                        conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
+                            SimpleDialog.confirm("是否停止运行 ${packageName.value}?") {
+                                AdbUtil.forceStop(packageName.value)
+                            }
                         }
                     }
                     Item(getRealLocation("clear"), "清除数据", false) {
-                        SimpleDialog.confirm("是否清除 ${packageName.value} 数据?") {
-                            AdbUtil.clear(packageName.value)
+                        conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
+                            SimpleDialog.confirm("是否清除 ${packageName.value} 数据?") {
+                                AdbUtil.clear(packageName.value)
+                                Toast.show("${packageName.value}清除缓存中....")
+                            }
                         }
                     }
                     Item(getRealLocation("delete"), "卸载应用", false) {
-                        SimpleDialog.confirm("是否卸载应用 ${packageName.value}?") {
-                            AdbUtil.uninstall(packageName.value)
+                        conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
+                            SimpleDialog.confirm("是否卸载应用 ${packageName.value}?") {
+                                AdbUtil.uninstall(packageName.value)
+                                Toast.show("${packageName.value}卸载中....")
+                            }
                         }
                     }
                 }
                 ContentNRow {
                     Item(getRealLocation("go"), "授予所有权限", false) {
-                        SimpleDialog.confirm("授予${packageName.value}应用所有权限?") {
-                            CoroutineScope(Dispatchers.Default).launch {
-                                AdbUtil.grant(packageName.value) {
-                                    log.debug("授予所有权限....")
+                        conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
+                            SimpleDialog.confirm("授予${packageName.value}应用所有权限?") {
+                                CoroutineScope(Dispatchers.Default).launch {
+                                    AdbUtil.grant(packageName.value) {
+                                        log.debug("授予所有权限....")
+                                        Toast.show("授予权限中....")
+                                    }
                                 }
                             }
                         }
                     }
 
                     Item(getRealLocation("back"), "撤销所有权限", false) {
-                        SimpleDialog.confirm("撤销${packageName.value}应用所有权限?") {
-                            CoroutineScope(Dispatchers.Default).launch {
-                                AdbUtil.unGrant(packageName.value) {
-                                    log.debug("撤销所有权限....")
+                        conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
+                            SimpleDialog.confirm("撤销${packageName.value}应用所有权限?") {
+                                CoroutineScope(Dispatchers.Default).launch {
+                                    AdbUtil.unGrant(packageName.value) {
+                                        log.debug("撤销所有权限....")
+                                        Toast.show("撤销权限中....")
+                                    }
                                 }
                             }
                         }
                     }
 
                     Item(getRealLocation("eye"), "查看应用信息", false) {
-                        CoroutineScope(Dispatchers.Default).launch {
-                            val info = AdbUtil.dump(packageName.value, "version")
-                            SimpleDialog.info(info, "结果")
+                        conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
+                            CoroutineScope(Dispatchers.Default).launch {
+                                val info = AdbUtil.dump(packageName.value, "version")
+                                SimpleDialog.info(info, "结果")
+                            }
                         }
                     }
 
-                    Item(getRealLocation("download"), "保存程序到电脑", false) {
-                        runBlocking {
-                            if (packageName.value.isBlank()) return@runBlocking
-                            val selectDir = PathSelectorUtil.selectDir("请选择存储目录")
-                            val path = AdbUtil.path(packageName.value).split(":")[1]
-                            if (selectDir.isNotEmpty()) {
-                                AdbUtil.pull(path, selectDir)
+                    Item(getRealLocation("copy"), "复制应用路径", false) {
+                        conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
+                            CoroutineScope(Dispatchers.Default).launch {
+                                val path = AdbUtil.path(packageName.value).split("\n")[0]
+                                val value = path.substring(path.indexOf(":") + 1)
+                                ClipboardUtils.setSysClipboardText(value)
+                                Toast.show("路径已写入剪切板")
                             }
                         }
                     }
@@ -317,16 +335,10 @@ fun QuickScreen() {
     }
 }
 
-fun applicationManager(runnable: () -> Unit) {
-    if (packageName.value.isBlank()) {
-        CoroutineScope(Dispatchers.Default).launch {
-
-        }
-    } else {
-        runnable.invoke()
-    }
-}
-
+/**
+ * 刷新应用列表
+ * @param keyWord 关键词
+ */
 fun syncAppList(keyWord: String = "") {
     val list = ArrayList<String>()
     var cmd = "pm list packages -f"
@@ -344,4 +356,17 @@ fun syncAppList(keyWord: String = "") {
         quickAppList.clear()
         quickAppList.addAll(list)
     }
+}
+
+/**
+ * 满足条件执行
+ * @param condition 条件
+ * @param error 异常反馈信息
+ * @param success 符合需要执行的函数
+ */
+fun conditionExe(condition: Boolean, error: String = "操作异常", success: () -> Unit) {
+    if (condition)
+        success.invoke()
+    else
+        Toast.show(text = error)
 }

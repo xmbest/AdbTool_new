@@ -26,10 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.android.ddmlib.FileListingService.FileEntry
 import com.xiaoming.state.GlobalState
 import com.xiaoming.utils.*
-import com.xiaoming.widget.InputDialog
-import com.xiaoming.widget.SimpleDialog
-import com.xiaoming.widget.inputText
-import com.xiaoming.widget.showingInputDialog
+import com.xiaoming.widget.*
 import config.route_left_item_color
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -65,13 +62,20 @@ fun FileScreen() {
             findFile()
         }
         Box(modifier = Modifier.fillMaxSize().onKeyEvent {
+            if ((it.isCtrlPressed || it.isMetaPressed) && it.isShiftPressed && it.key.keyCode == Key.N.keyCode) {
+                createDir("/" + currentPath.value)
+                log.debug("ctrl + shift + n")
+                return@onKeyEvent true
+            }
             if ((it.isCtrlPressed || it.isMetaPressed) && it.key.keyCode == Key.N.keyCode) {
+                createFile("/" + currentPath.value)
                 log.debug("ctrl + n")
                 return@onKeyEvent true
             }
             if ((it.isCtrlPressed || it.isMetaPressed) && it.key.keyCode == Key.C.keyCode) {
                 log.debug("ctrl + c")
                 ClipboardUtils.setSysClipboardText("/" + currentPath.value)
+                Toast.show("已将路径写入剪切板")
                 return@onKeyEvent true
             }
             if (it.isCtrlPressed || it.isMetaPressed) {
@@ -152,7 +156,7 @@ fun findFile() {
 }
 
 
-fun findFile(time:Long){
+fun findFile(time: Long) {
     CoroutineScope(Dispatchers.Default).launch {
         delay(time)
         findFile()
@@ -318,16 +322,7 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
                 painter = painterResource(ImgUtil.getRealLocation("file-add")),
                 null,
                 modifier = Modifier.size(50.dp).clickable {
-                    inputText.value = ""
-                    InputDialog.confirm("创建新文件", hint = "请输入文件名称") {
-                        if (inputText.value.isNotBlank()) {
-                            AdbUtil.touch(path = path + "/${inputText.value}")
-                            showingInputDialog.value = false
-                            findFile(200)
-                        }else{
-
-                        }
-                    }
+                    createFile(path)
                 }.padding(10.dp),
                 tint = GOOGLE_BLUE
             )
@@ -340,16 +335,7 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
                 painter = painterResource(ImgUtil.getRealLocation("folder-add")),
                 null,
                 modifier = Modifier.size(50.dp).clickable {
-                    inputText.value = ""
-                    InputDialog.confirm("创建文件夹", hint = "请输入文件夹名称") {
-                        if (inputText.value.isNotBlank()) {
-                            AdbUtil.mkdir(path = path + "/${inputText.value}",777)
-                            showingInputDialog.value = false
-                            findFile(200)
-                        }else{
-
-                        }
-                    }
+                    createDir(path)
                 }.padding(10.dp),
                 tint = GOOGLE_GREEN
             )
@@ -366,6 +352,8 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
                         val selectDir = PathSelectorUtil.selectFileOrDir("请选择需要上传的文件、目录")
                         if (selectDir.isNotEmpty()) {
                             AdbUtil.push(selectDir, path)
+                            findFile(200)
+                            Toast.show("文件上传中，未及时刷新请手动刷新(F5)")
                         }
                     }
                 }.padding(10.dp),
@@ -382,19 +370,20 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
                 tint = GOOGLE_YELLOW,
                 modifier = Modifier.size(50.dp).clickable {
                     inputText.value = name
-                    InputDialog.confirm(hint = "请输入新文件名称", title = "重命名") {
+                    InputDialog.confirm(hint = "请输入新名称", title = "重命名") {
                         if (inputText.value.isEmpty() || inputText.value == name) {
-                            // 不可为空
+                            Toast.show("名称不可为空")
                             return@confirm
                         }
                         val filterList = fileList.filter { it.name == inputText.value }
                         if (filterList.isNotEmpty()) {
-                            // 重复
+                            Toast.show("名称已存在")
                             return@confirm
                         }
                         AdbUtil.mv(path, parentPath + "/" + inputText.value)
                         showingInputDialog.value = false
                         findFile(200)
+                        Toast.show("重命名中...未及时刷新请手动刷新(F5)")
                     }
                 }.padding(10.dp)
             )
@@ -436,9 +425,54 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
     }
 }
 
+/**
+ * 删除文件
+ * @param path 需要删除的路径
+ */
 fun deleteFile(path: String) {
     SimpleDialog.confirm("是否删除 `${path}`") {
         AdbUtil.rf(path)
+        findFile(200)
+        Toast.show("文件删除中，未及时刷新请手动刷新(F5)")
+    }
+}
+
+
+/**
+ * 创建文件
+ * @param path 父目录
+ */
+fun createFile(path: String) {
+    inputText.value = ""
+    InputDialog.confirm("创建新文件", hint = "请输入文件名称") {
+        if (inputText.value.isNotBlank()) {
+            AdbUtil.touch(path = path + "/${inputText.value}")
+            showingInputDialog.value = false
+            findFile(200)
+            Toast.show("文件创建中，未及时刷新请手动刷新(F5)")
+        } else {
+            Toast.show("请输入文件名称")
+        }
+    }
+}
+
+
+/**
+ * 创建文件夹
+ * @param path 父目录
+ */
+
+fun createDir(path: String) {
+    inputText.value = ""
+    InputDialog.confirm("创建文件夹", hint = "请输入文件夹名称") {
+        if (inputText.value.isNotBlank()) {
+            AdbUtil.mkdir(path = path + "/${inputText.value}", 777)
+            showingInputDialog.value = false
+            findFile(200)
+            Toast.show("文件夹创建中，未及时刷新请手动刷新(F5)")
+        } else {
+            Toast.show("请输入文件夹名称")
+        }
     }
 }
 

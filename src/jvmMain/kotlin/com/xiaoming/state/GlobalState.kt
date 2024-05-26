@@ -9,17 +9,17 @@ import com.xiaming.screen.SettingScreen
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.entity.Page
 import com.xiaoming.screen.TaskScreen
-import com.xiaoming.screen.BroadcastScreen
+import com.xiaoming.screen.OrderScreen
 import com.xiaoming.screen.QuickScreen
 import javax.swing.filechooser.FileSystemView
 
 object GlobalState{
     // 配置布局列表数据
     val pages = listOf(
-        Page("快捷功能", ImgUtil.getRealLocation("pin")) { QuickScreen() },
+        Page("常用功能", ImgUtil.getRealLocation("pin")) { QuickScreen() },
+        Page("进程管理", ImgUtil.getRealLocation("process")) { TaskScreen() },
         Page("文件管理", ImgUtil.getRealLocation("folder")) { FileScreen() },
-        Page("进程管理", ImgUtil.getRealLocation("android")) { TaskScreen() },
-        Page("广播模拟", ImgUtil.getRealLocation("broadcast")) { BroadcastScreen() },
+        Page("快捷指令", ImgUtil.getRealLocation("order")) { OrderScreen() },
         Page("程序设置", ImgUtil.getRealLocation("settings")) { SettingScreen() }
     )
     // 已连接设备列表

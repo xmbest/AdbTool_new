@@ -34,6 +34,7 @@ fun Router() {
     }
     //显示
     Box(modifier = Modifier.fillMaxSize()) {
+        Toast()
         if (showingSimpleDialog.value) {
             SimpleDialog(
                 title = title.value,
