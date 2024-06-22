@@ -3,6 +3,7 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
@@ -14,7 +15,11 @@ import com.xiaoming.db.DAOImpl
 import com.xiaoming.module.AdbModule
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.router.Router
+import com.xiaoming.state.GlobalState
 import com.xiaoming.state.StateKeyValue
+import com.xiaoming.utils.initOsType
+import com.xiaoming.utils.isMac
+import com.xiaoming.utils.isWindows
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -24,6 +29,7 @@ import kotlinx.coroutines.launch
 import theme.GOOGLE_BLUE
 import java.awt.Dimension
 import java.awt.Toolkit
+import java.io.File
 
 @Composable
 @Preview
@@ -53,7 +59,9 @@ fun main() = application {
             snapshotFlow { state.isMinimized }
                 .onEach(::onMinimized).launchIn(this)
         }
-        init()
+//        init()
+        initOsType()
+        checkFile()
         dataInit()
     }
 }
@@ -77,8 +85,29 @@ private fun dataInit(){
                 }
             }
         }
+        AdbModule.changeAdb(GlobalState.adbSelect.value)
     }
 
+}
+
+private fun checkFile(){
+    if (isWindows){
+        val file = File(File(GlobalState.sHomePath, "AdbTool"), "adb.exe")
+        if (!file.exists()){
+            file.createNewFile()
+            useResource("adb/adb.exe") {
+                it.copyTo(file.outputStream())
+            }
+        }
+    }else if (isMac){
+        val file = File(File(GlobalState.sHomePath, "AdbTool"), "adb")
+        if (!file.exists()){
+            file.createNewFile()
+            useResource("adb/adb") {
+                it.copyTo(file.outputStream())
+            }
+        }
+    }
 }
 
 private fun onMinimized(isMinimized: Boolean) {

@@ -36,9 +36,13 @@ object DAOImpl : DAO {
 
     override suspend fun putString(key: String, value: String) {
         transaction(db) {
-            KeyValue.find {
+            val keyValue = KeyValue.find {
                 Table.k eq key
-            }.last().delete()
+            }
+
+            if (!keyValue.empty()){
+                keyValue.last().delete()
+            }
 
             KeyValue.new {
                 k = key

@@ -38,7 +38,11 @@ object GlobalState{
     val sHomePath: String = System.getProperty("user.home")
     // 任务管理搜索关键词
     val sTaskKeyWords = mutableStateOf(StateKeyValue.sTaskSearchKeyWords.second)
-    // adb路径，配置环境变量即 adb
+    // adb 选项
+    val adbSelect = mutableStateOf(StateKeyValue.sAdbSelect.second)
+    // 自定义adb路径
+    val adbCustomPath = mutableStateOf(StateKeyValue.sAdbCustomPath.second)
+    // adb执行路径
     val adb = mutableStateOf("adb")
     val port = mutableStateOf("5555")
 }

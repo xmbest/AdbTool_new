@@ -7,11 +7,14 @@ import com.android.ddmlib.internal.DeviceImpl
 import com.xiaoming.entity.DeviceInfo
 import com.xiaoming.screen.deviceInfo
 import com.xiaoming.state.GlobalState
+import com.xiaoming.state.StateKeyValue
 import com.xiaoming.utils.AdbUtil
+import com.xiaoming.utils.isWindows
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 
@@ -49,9 +52,9 @@ object AdbModule {
                 }
                 info.model = it.getProperty("ro.product.model")
                 info.brand = it.getProperty("ro.product.brand")
-                info.ip = AdbUtil.shell("ifconfig wlan0 |  grep addr:1 |  awk  '{print \$2}'",200)
-                if (info.ip.contains(":")){
-                    info.ip  = info.ip.split(":")[1]
+                info.ip = AdbUtil.shell("ifconfig wlan0 |  grep addr:1 |  awk  '{print \$2}'", 200)
+                if (info.ip.contains(":")) {
+                    info.ip = info.ip.split(":")[1]
                 }
             }
             deviceInfo.value = info
@@ -103,6 +106,34 @@ object AdbModule {
                 changeDevice(if (GlobalState.sDeviceSet.isNotEmpty()) GlobalState.sDeviceSet.first() as DeviceImpl else null)
             }
         }
+    }
+
+    /**
+     * 切换adb执行环境
+     */
+    fun changeAdb(value: String) {
+        when (value) {
+            StateKeyValue.DEFAULT.first -> {
+                GlobalState.adb.value = File(File(GlobalState.sHomePath, "AdbTool"), if (isWindows) "adb.exe" else "adb").absolutePath
+            }
+
+            StateKeyValue.ENV.first -> {
+                GlobalState.adb.value = "adb"
+            }
+
+            else -> {
+                GlobalState.adb.value = GlobalState.adbCustomPath.value
+
+            }
+        }
+
+        if (GlobalState.adb.value.isEmpty()) {
+            GlobalState.adb.value = "adb"
+        }
+
+        println("init adb = ${GlobalState.adb.value}")
+        AndroidDebugBridge.terminate()
+        init()
     }
 
     /**
