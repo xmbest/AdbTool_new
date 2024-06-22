@@ -13,7 +13,7 @@ public class BashUtil {
     private static Logger logger = LoggerFactory.getLogger(BashUtil.class);
 
     public static String execCommand(String command) throws IOException, InterruptedException {
-        return execCommand(command, GlobalState.INSTANCE.getSHomePath().getValue());
+        return execCommand(command, GlobalState.INSTANCE.getSDesktopPath().getValue());
     }
 
 

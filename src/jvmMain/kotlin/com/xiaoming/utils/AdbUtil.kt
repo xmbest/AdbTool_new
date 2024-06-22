@@ -143,8 +143,8 @@ object AdbUtil {
                 val formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss")
                 val fileName = currentDateTime.format(formatter) + ".png"
                 val desktop =
-                    if (GlobalState.sHomePath.value.contains("Desktop")) File(GlobalState.sHomePath.value) else File(
-                        GlobalState.sHomePath.value,
+                    if (GlobalState.sDesktopPath.value.contains("Desktop")) File(GlobalState.sDesktopPath.value) else File(
+                        GlobalState.sDesktopPath.value,
                         "Desktop"
                     )
                 val screenshot = it.screenshot.asBufferedImage()

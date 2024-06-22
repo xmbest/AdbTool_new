@@ -10,11 +10,14 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.xiaming.config.window_height
 import com.xiaming.config.window_width
+import com.xiaoming.db.DAOImpl
 import com.xiaoming.module.AdbModule
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.router.Router
+import com.xiaoming.state.StateKeyValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -51,6 +54,7 @@ fun main() = application {
                 .onEach(::onMinimized).launchIn(this)
         }
         init()
+        dataInit()
     }
 }
 
@@ -60,6 +64,21 @@ private fun init(){
         //初始化 adb
         AdbModule.init()
     }
+}
+
+private fun dataInit(){
+    CoroutineScope(Dispatchers.Default).launch {
+        delay(500)
+        DAOImpl.findAll().forEach{keyValue->
+            StateKeyValue.sList.forEach {
+                if (it.first == keyValue.k){
+                    StateKeyValue.getMap()[it.first]?.value = keyValue.v
+                    println("key = ${keyValue.k},value = ${keyValue.v}")
+                }
+            }
+        }
+    }
+
 }
 
 private fun onMinimized(isMinimized: Boolean) {

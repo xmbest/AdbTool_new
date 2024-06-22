@@ -33,7 +33,11 @@ object GlobalState{
     // 当前选中的页码
     val sCurrentIndex = mutableStateOf(0)
     // 桌面位置
-    val sHomePath = mutableStateOf(FileSystemView.getFileSystemView().homeDirectory.absolutePath)
+    val sDesktopPath = mutableStateOf(FileSystemView.getFileSystemView().homeDirectory.absolutePath)
+    // 文件存储路径
+    val sHomePath: String = System.getProperty("user.home")
+    // 任务管理搜索关键词
+    val sTaskKeyWords = mutableStateOf(StateKeyValue.sTaskSearchKeyWords.second)
     // adb路径，配置环境变量即 adb
     val adb = mutableStateOf("adb")
     val port = mutableStateOf("5555")

@@ -25,8 +25,10 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.unit.dp
+import com.xiaoming.db.DAOImpl
 import com.xiaoming.entity.Task
 import com.xiaoming.state.GlobalState
+import com.xiaoming.state.StateKeyValue
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.widget.Toast
 import config.route_left_item_color
@@ -38,7 +40,6 @@ import kotlin.math.max
 val checkA = mutableStateOf(true)
 val taskList = mutableStateListOf<Task>()
 val taskTitle = mutableStateOf(Task(origin = "USER           PID  PPID     VSZ    RSS WCHAN            ADDR S NAME"))
-val taskKeyWord = mutableStateOf("system")
 
 /**
  * 进程管理
@@ -157,19 +158,19 @@ fun TaskNav() {
             colors = CheckboxDefaults.colors(checkedColor = GOOGLE_BLUE)
         )
         TextField(
-            taskKeyWord.value,
+            GlobalState.sTaskKeyWords.value,
             trailingIcon = {
-                if (taskKeyWord.value.isNotBlank()) Icon(
+                if (GlobalState.sTaskKeyWords.value.isNotBlank()) Icon(
                     Icons.Default.Close,
                     null,
                     modifier = Modifier.width(20.dp).height(20.dp).clickable {
-                        taskKeyWord.value = ""
+                        GlobalState.sTaskKeyWords.value = ""
                     },
                     tint = route_left_item_color
                 )
             },
             placeholder = { Text("keyword") },
-            onValueChange = { taskKeyWord.value = it },
+            onValueChange = { GlobalState.sTaskKeyWords.value = it },
             singleLine = true,
             modifier = Modifier.weight(1f).height(48.dp).padding(end = 10.dp).onKeyEvent {
                 if (it.key.keyCode == Key.Enter.keyCode) {
@@ -206,7 +207,9 @@ fun TaskNav() {
  */
 fun findTask() {
     CoroutineScope(Dispatchers.Default).launch {
-        AdbUtil.findProcessByKeyword(taskKeyWord.value, checkA.value) { list ->
+        // 存储关键词
+        DAOImpl.putString(StateKeyValue.sTaskSearchKeyWords.first,GlobalState.sTaskKeyWords.value)
+        AdbUtil.findProcessByKeyword(GlobalState.sTaskKeyWords.value, checkA.value) { list ->
             // 搜索归位
             taskTitle.value = taskTitle.value.copy(checked = false)
             taskList.clear()
