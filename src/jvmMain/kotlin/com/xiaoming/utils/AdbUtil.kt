@@ -43,7 +43,7 @@ object AdbUtil {
      * 执行在控制台命令
      * @param cmd adb 后的命令 === adb cmd
      */
-    private fun shellByProcess(cmd: String) {
+    fun shellByProcess(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.let {
                 log.debug("${GlobalState.adb.value} -s $it $cmd")

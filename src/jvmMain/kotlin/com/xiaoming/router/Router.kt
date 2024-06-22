@@ -17,6 +17,7 @@ import com.xiaoming.module.AdbModule
 import com.xiaoming.utils.ImgUtil.getRealLocation
 import com.xiaoming.widget.*
 import com.xiaoming.state.GlobalState
+import com.xiaoming.utils.AdbUtil
 import config.*
 
 @Composable
@@ -102,7 +103,10 @@ fun Left(modifier: Modifier) {
                     Icon(
                         painter = painterResource(getRealLocation("mobile")),
                         null,
-                        tint = route_left_item_color
+                        tint = route_left_item_color,
+                        modifier = Modifier.clickable {
+                            AdbUtil.shellByProcess("devices")
+                        }
                     )
                 },
                 modifier = Modifier.clip(RoundedCornerShape(route_left_item_rounded))

@@ -7,7 +7,7 @@ plugins {
 
 group = "com.xiaoming"
 version = "1.0-SNAPSHOT"
-val appVersion = "1.0.0"
+val appVersion = "1.0.1"
 val exposedVersion: String by project
 repositories {
     google()
