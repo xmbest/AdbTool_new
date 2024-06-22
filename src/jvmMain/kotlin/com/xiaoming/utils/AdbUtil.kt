@@ -58,7 +58,7 @@ object AdbUtil {
      */
     fun shell(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            log.debug("adb shell '$cmd'")
+            log.debug("adb shell \"$cmd\"")
             GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
                 override fun isCancelled(): Boolean = false
                 override fun processNewLines(lines: Array<out String>?) {
@@ -202,6 +202,13 @@ object AdbUtil {
         log.debug("adb shell am force-stop $packageName")
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.forceStop(packageName)
+        }
+    }
+
+    fun kill(pids: String) {
+        log.debug("adb shell am force-stop $pids")
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.kill(pids)
         }
     }
 
@@ -505,6 +512,34 @@ object AdbUtil {
                 }
             )
         }
+    }
+
+    /**
+     * 查找当前task
+     * @param keyWord 关键词
+     * @param block 回调函数
+     */
+    fun findProcessByKeyword(keyWord: String = "system", needA: Boolean = true, block: (List<String>) -> Unit) {
+        val set = mutableSetOf<String>()
+        val cmd = "ps ${if (needA) "-A" else ""} | grep $keyWord"
+
+        GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
+            override fun isCancelled(): Boolean {
+                return false
+            }
+
+            override fun processNewLines(lines: Array<out String>?) {
+                lines?.let {
+                    set.addAll(it)
+                }
+            }
+
+            override fun done() {
+                super.done()
+                log.debug("findProcessByKeyword done")
+                block.invoke(set.filter { it.isNotEmpty() })
+            }
+        })
     }
 
 }

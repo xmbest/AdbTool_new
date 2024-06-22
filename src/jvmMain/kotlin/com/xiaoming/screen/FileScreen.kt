@@ -197,12 +197,13 @@ fun FileNav(
     }
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 5.dp, start = 10.dp).background(Color.White)
+        modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 5.dp).background(Color.White)
             .clip(
                 RoundedCornerShape(5.dp)
             ).combinedClickable(onDoubleClick = { block() }, onClick = {}),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Spacer(modifier = Modifier.width(10.dp))
         Icon(
             painter = painterResource(ImgUtil.getFileIcon(currentPath.value, true)),
             "icon",
@@ -240,12 +241,13 @@ fun FileView(
     }
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 5.dp, start = 10.dp).background(Color.White)
+        modifier = Modifier.fillMaxWidth().height(60.dp).padding(top = 5.dp).background(Color.White)
             .clip(
                 RoundedCornerShape(5.dp)
             ).combinedClickable(onDoubleClick = { block() }, onClick = {}),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Spacer(modifier = Modifier.width(10.dp))
         Icon(
             painter = painterResource(ImgUtil.getFileIcon(file.name, file.isDirectory)),
             "icon",
