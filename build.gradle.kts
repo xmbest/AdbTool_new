@@ -36,7 +36,7 @@ kotlin {
 compose.desktop {
     application {
         nativeDistributions{
-            modules("java.compiler", "java.instrument", "java.management", "java.naming", "java.sql", "jdk.unsupported")
+            modules("java.compiler", "java.instrument", "java.management", "jdk.unsupported")
         }
         buildTypes.release.proguard {
             isEnabled.set(false)
