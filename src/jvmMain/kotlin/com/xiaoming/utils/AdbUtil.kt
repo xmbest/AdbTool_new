@@ -41,7 +41,7 @@ object AdbUtil {
      * 执行在控制台命令
      * @param cmd adb 后的命令 === adb cmd
      */
-    fun shellByProcess(cmd: String) {
+    private fun shellByProcess(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.let {
                 LogUtil.d("${GlobalState.adb.value} -s $it $cmd")
@@ -50,7 +50,7 @@ object AdbUtil {
         }
     }
 
-    fun devices(){
+    fun devices() {
         CoroutineScope(Dispatchers.Default).launch {
             BashUtil.execCommand("${GlobalState.adb.value} devices")
         }
@@ -296,9 +296,19 @@ object AdbUtil {
      * @param remote 目标调试设备路径
      */
     fun pull(remote: String, local: String) {
-//        ddms#push only handle file
-//        GlobalState.sCurrentDevice.value?.pullFile(remote, local)
-        shellByProcess("pull $remote $local/")
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.let {
+                if (isMac) {
+                    FileUtil.writeShell("pull", "${GlobalState.adb.value} -s $it pull $remote $local/")
+                    BashUtil.execCommand("open -b com.apple.terminal ${GlobalState.workDir + "/" + "pull.sh"}")
+                } else if (isWindows) {
+
+                } else {
+                    shellByProcess("pull $remote $local/")
+                }
+
+            }
+        }
     }
 
     /**
@@ -308,8 +318,16 @@ object AdbUtil {
      */
     fun push(local: String, remote: String) {
         CoroutineScope(Dispatchers.Default).launch {
-//            GlobalState.sCurrentDevice.value?.pushFile(local, remote)
-            shellByProcess("push $local $remote/")
+            GlobalState.sCurrentDevice.value?.let {
+                if (isMac) {
+                    FileUtil.writeShell("push", "${GlobalState.adb.value} -s $it push $local $remote/")
+                    BashUtil.execCommand("open -b com.apple.terminal ${GlobalState.workDir + "/" + "push.sh"}")
+                } else if (isWindows) {
+
+                } else {
+                    shellByProcess("push $local $remote/")
+                }
+            }
         }
     }
 

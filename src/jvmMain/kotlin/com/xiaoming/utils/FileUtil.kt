@@ -1,5 +1,9 @@
 package com.xiaoming.utils
 
+import com.xiaoming.state.GlobalState
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.text.DecimalFormat
 
 object FileUtil {
@@ -47,5 +51,13 @@ object FileUtil {
             size + "B   "
         }
         return resultSize
+    }
+
+    fun writeShell(name: String, shell: String) {
+        val file = File(GlobalState.workDir, "$name.sh")
+        val output = BufferedOutputStream(FileOutputStream(file))
+        output.write((shell).toByteArray())
+        output.flush()
+        output.close()
     }
 }

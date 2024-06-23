@@ -96,7 +96,9 @@ private fun dataInit(){
 private fun writeFile(){
     val adb = Pair(if (isWindows) "adb.exe" else "adb","adb")
     val properties = Pair("cfg.properties","cfg")
-    val listFile = listOf(adb,properties)
+    val push = Pair("push.sh","shell")
+    val pull = Pair("pull.sh","shell")
+    val listFile = listOf(adb,properties,push,pull)
     listFile.forEach {
         val file = File(GlobalState.workDir, it.first)
         if (!file.exists()){
