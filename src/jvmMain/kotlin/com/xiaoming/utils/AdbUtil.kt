@@ -4,7 +4,6 @@ import com.android.ddmlib.*
 import com.xiaoming.state.GlobalState
 import com.xiaoming.widget.SimpleDialog
 import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
 import theme.GOOGLE_YELLOW
 import java.io.File
 import java.time.LocalDateTime
@@ -14,7 +13,6 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 object AdbUtil {
-    private val log = LoggerFactory.getLogger(this.javaClass)
 
     /**
      * ⚠️危险目录
@@ -46,7 +44,7 @@ object AdbUtil {
     fun shellByProcess(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.let {
-                log.debug("${GlobalState.adb.value} -s $it $cmd")
+                LogUtil.d("${GlobalState.adb.value} -s $it $cmd")
                 BashUtil.execCommand("${GlobalState.adb.value} -s $it $cmd")
             }
         }
@@ -58,12 +56,12 @@ object AdbUtil {
      */
     fun shell(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            log.debug("adb shell \"$cmd\"")
+            LogUtil.d("adb shell \"$cmd\"")
             GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
                 override fun isCancelled(): Boolean = false
                 override fun processNewLines(lines: Array<out String>?) {
                     lines?.forEach {
-                        log.debug(it)
+                        LogUtil.d(it)
                     }
                 }
             })
@@ -88,14 +86,14 @@ object AdbUtil {
                         val str = lines.filter { line -> line.isNotEmpty() }.joinToString("\n")
                         if (str.isNotBlank()) {
                             suspendSingle.resume(str)
-                            log.debug("adb shell \"$cmd\"\n$str")
+                            LogUtil.d("adb shell \"$cmd\"\n$str")
                         }
                     }
                 }
             })
             delay(timeMillis)
             if (isActive && !resume) {
-                log.debug("adb shell '$cmd' timout,timeout = $timeMillis")
+                LogUtil.d("adb shell '$cmd' timout,timeout = $timeMillis")
                 resume = true
                 suspendSingle.resume("")
             }
@@ -159,7 +157,7 @@ object AdbUtil {
      */
     fun root() {
         CoroutineScope(Dispatchers.Default).launch {
-            log.debug("adb root")
+            LogUtil.d("adb root")
             GlobalState.sCurrentDevice.value?.root()
         }
     }
@@ -177,7 +175,7 @@ object AdbUtil {
      */
     fun reboot() {
         CoroutineScope(Dispatchers.Default).launch {
-            log.debug("adb reboot")
+            LogUtil.d("adb reboot")
             GlobalState.sCurrentDevice.value?.reboot("")
         }
     }
@@ -189,7 +187,7 @@ object AdbUtil {
     fun start(packageName: String) {
         CoroutineScope(Dispatchers.Default).launch {
             val launchActivity = getLaunchActivity(packageName)
-            log.debug("am start packageName = $packageName,launchActivity = $launchActivity")
+            LogUtil.d("am start packageName = $packageName,launchActivity = $launchActivity")
             if (launchActivity.isBlank()) shell("monkey -p $packageName -v 1") else shell("am start $launchActivity")
         }
     }
@@ -199,14 +197,14 @@ object AdbUtil {
      * @param packageName 包名
      */
     fun forceStop(packageName: String) {
-        log.debug("adb shell am force-stop $packageName")
+        LogUtil.d("adb shell am force-stop $packageName")
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.forceStop(packageName)
         }
     }
 
     fun kill(pids: String) {
-        log.debug("adb shell am force-stop $pids")
+        LogUtil.d("adb shell am force-stop $pids")
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.kill(pids)
         }
@@ -226,7 +224,7 @@ object AdbUtil {
      */
     fun uninstall(packageName: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            log.debug("adb uninstall $packageName")
+            LogUtil.d("adb uninstall $packageName")
             GlobalState.sCurrentDevice.value?.uninstallPackage(packageName)
         }
     }
@@ -238,7 +236,7 @@ object AdbUtil {
      */
     fun install(packagePath: String, receiver: InstallReceiver? = null) {
         CoroutineScope(Dispatchers.Default).launch {
-            log.debug("adb install $packagePath")
+            LogUtil.d("adb install $packagePath")
             GlobalState.sCurrentDevice.value?.installPackage(packagePath, true, receiver)
         }
     }
@@ -398,7 +396,7 @@ object AdbUtil {
 
             override fun done() {
                 super.done()
-                log.debug("findAllPermissionList done")
+                LogUtil.d("findAllPermissionList done")
                 for (value in permissionStr) {
                     if (value.contains("android.permission.")) {
                         val permissionLine = value.replace(" ", "").split(":")
@@ -487,7 +485,7 @@ object AdbUtil {
         path: String,
         func: (FileListingService.FileEntry?, Array<out FileListingService.FileEntry>?) -> () -> Unit
     ) {
-        log.debug("findFileList path = $path")
+        LogUtil.d("findFileList path = $path")
         GlobalState.sFileListingService.value?.let {
             it.getChildren(
                 if (path.isEmpty()) it.root else FileListingService.FileEntry(
@@ -506,7 +504,7 @@ object AdbUtil {
                     }
 
                     override fun refreshEntry(entry: FileListingService.FileEntry?) {
-                        log.debug("refreshEntry")
+                        LogUtil.d("refreshEntry")
                     }
 
                 }
@@ -536,7 +534,7 @@ object AdbUtil {
 
             override fun done() {
                 super.done()
-                log.debug("findProcessByKeyword done")
+                LogUtil.d("findProcessByKeyword done")
                 block.invoke(set.filter { it.isNotEmpty() })
             }
         })

@@ -1,12 +1,17 @@
 package com.xiaoming.screen
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -14,21 +19,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
-import com.xiaoming.utils.ImgUtil
-import com.xiaoming.utils.ImgUtil.getRealLocation
-import com.xiaoming.widget.*
 import com.xiaoming.entity.DeviceInfo
 import com.xiaoming.entity.KeyMapper
 import com.xiaoming.state.GlobalState
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.utils.ClipboardUtils
-import com.xiaoming.utils.PathSelectorUtil
+import com.xiaoming.utils.ImgUtil
+import com.xiaoming.utils.ImgUtil.getRealLocation
+import com.xiaoming.utils.LogUtil
+import com.xiaoming.widget.*
 import config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import theme.GOOGLE_BLUE
 import theme.GOOGLE_GREEN
 import theme.GOOGLE_RED
@@ -43,7 +46,6 @@ val deviceInfo = mutableStateOf(DeviceInfo())
 @OptIn(ExperimentalMaterialApi::class, ExperimentalUnitApi::class)
 @Composable
 fun QuickScreen() {
-    val log = LoggerFactory.getLogger("QuickScreen")
     val keyMapperList1 = listOf(
         KeyMapper(getRealLocation("task"), 187, "任务列表"),
         KeyMapper(getRealLocation("home"), 3, "回到桌面"),
@@ -213,7 +215,7 @@ fun QuickScreen() {
                             SimpleDialog.confirm("授予${packageName.value}应用所有权限?") {
                                 CoroutineScope(Dispatchers.Default).launch {
                                     AdbUtil.grant(packageName.value) {
-                                        log.debug("授予所有权限....")
+                                        LogUtil.d("授予所有权限....")
                                         Toast.show("授予权限中....")
                                     }
                                 }
@@ -226,7 +228,7 @@ fun QuickScreen() {
                             SimpleDialog.confirm("撤销${packageName.value}应用所有权限?") {
                                 CoroutineScope(Dispatchers.Default).launch {
                                     AdbUtil.unGrant(packageName.value) {
-                                        log.debug("撤销所有权限....")
+                                        LogUtil.d("撤销所有权限....")
                                         Toast.show("撤销权限中....")
                                     }
                                 }

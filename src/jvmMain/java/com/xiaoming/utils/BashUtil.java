@@ -1,16 +1,12 @@
 package com.xiaoming.utils;
 
 import com.xiaoming.state.GlobalState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BashUtil {
-
-    private static Logger logger = LoggerFactory.getLogger(BashUtil.class);
 
     public static String execCommand(String command) throws IOException, InterruptedException {
         return execCommand(command, GlobalState.INSTANCE.getSDesktopPath().getValue());
@@ -68,7 +64,7 @@ public class BashUtil {
                     if (!error) {
                         stringBuilder.append(line).append("\n");
                     } else {
-                        logger.error(line);
+                        LogUtil.INSTANCE.e(line);
                     }
                 }
             } catch (IOException e) {

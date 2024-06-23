@@ -29,10 +29,7 @@ import com.xiaoming.utils.*
 import com.xiaoming.widget.*
 import config.route_left_item_color
 import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
 import theme.*
-
-private val log = LoggerFactory.getLogger("FileScreen")
 
 /**
  * 文件列表
@@ -64,22 +61,22 @@ fun FileScreen() {
         Box(modifier = Modifier.fillMaxSize().onKeyEvent {
             if ((it.isCtrlPressed || it.isMetaPressed) && it.isShiftPressed && it.key.keyCode == Key.N.keyCode) {
                 createDir("/" + currentPath.value)
-                log.debug("ctrl + shift + n")
+                LogUtil.d("ctrl + shift + n")
                 return@onKeyEvent true
             }
             if ((it.isCtrlPressed || it.isMetaPressed) && it.key.keyCode == Key.N.keyCode) {
                 createFile("/" + currentPath.value)
-                log.debug("ctrl + n")
+                LogUtil.d("ctrl + n")
                 return@onKeyEvent true
             }
             if ((it.isCtrlPressed || it.isMetaPressed) && it.key.keyCode == Key.C.keyCode) {
-                log.debug("ctrl + c")
+                LogUtil.d("ctrl + c")
                 ClipboardUtils.setSysClipboardText("/" + currentPath.value)
                 Toast.show("已将路径写入剪切板")
                 return@onKeyEvent true
             }
             if (it.isCtrlPressed || it.isMetaPressed) {
-                log.debug("filter ctrl、window、command")
+                LogUtil.d("filter ctrl、window、command")
                 return@onKeyEvent true
             }
             if (it.type == KeyEventType.KeyDown) {
@@ -96,7 +93,7 @@ fun FileScreen() {
                     return@onKeyEvent true
                 } else if (it.key.keyCode == Key.Escape.keyCode) {
                     if (filter.value.isBlank()) {
-                        log.debug("backParent Esc")
+                        LogUtil.d("backParent Esc")
                         backParent()
                         return@onKeyEvent true
                     } else {
@@ -146,7 +143,7 @@ fun FileScreen() {
 fun findFile() {
     AdbUtil.findFileList(currentPath.value) { entry, children ->
         {
-            log.debug("findFile callback")
+            LogUtil.d("findFile callback")
             fileList.clear()
             children?.filter { it.name.contains(filter.value, true) }?.forEach {
                 fileList.add(it)
