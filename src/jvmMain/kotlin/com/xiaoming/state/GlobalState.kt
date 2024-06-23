@@ -5,12 +5,13 @@ import com.android.ddmlib.FileListingService
 import com.android.ddmlib.IDevice
 import com.android.ddmlib.internal.DeviceImpl
 import com.xiaoming.screen.FileScreen
-import com.xiaming.screen.SettingScreen
+import com.xiaoming.screen.SettingScreen
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.entity.Page
 import com.xiaoming.screen.TaskScreen
 import com.xiaoming.screen.OrderScreen
 import com.xiaoming.screen.QuickScreen
+import java.io.File
 import javax.swing.filechooser.FileSystemView
 
 object GlobalState{
@@ -44,5 +45,9 @@ object GlobalState{
     val adbCustomPath = mutableStateOf(StateKeyValue.sAdbCustomPath.second)
     // adb执行路径
     val adb = mutableStateOf("adb")
+    // 是否保存日志
+    val saveLog = mutableStateOf(false)
     val port = mutableStateOf("5555")
+    // 文件写入目录
+    val workDir = File(sHomePath,"AdbTool").absolutePath
 }

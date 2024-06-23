@@ -23,13 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.unit.dp
-import com.xiaoming.db.DAOImpl
 import com.xiaoming.entity.Task
 import com.xiaoming.state.GlobalState
 import com.xiaoming.state.StateKeyValue
 import com.xiaoming.utils.AdbUtil
+import com.xiaoming.utils.PropertiesUtil
 import com.xiaoming.widget.Toast
 import config.route_left_item_color
 import kotlinx.coroutines.*
@@ -208,7 +207,7 @@ fun TaskNav() {
 fun findTask() {
     CoroutineScope(Dispatchers.Default).launch {
         // 存储关键词
-        DAOImpl.putString(StateKeyValue.sTaskSearchKeyWords.first,GlobalState.sTaskKeyWords.value)
+        PropertiesUtil.setValue(StateKeyValue.sTaskSearchKeyWords.first,GlobalState.sTaskKeyWords.value)
         AdbUtil.findProcessByKeyword(GlobalState.sTaskKeyWords.value, checkA.value) { list ->
             // 搜索归位
             taskTitle.value = taskTitle.value.copy(checked = false)

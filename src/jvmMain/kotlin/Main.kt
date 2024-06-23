@@ -11,14 +11,13 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.xiaming.config.window_height
 import com.xiaming.config.window_width
-import com.xiaoming.db.DAOImpl
 import com.xiaoming.module.AdbModule
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.router.Router
 import com.xiaoming.state.GlobalState
 import com.xiaoming.state.StateKeyValue
+import com.xiaoming.utils.PropertiesUtil
 import com.xiaoming.utils.initOsType
-import com.xiaoming.utils.isMac
 import com.xiaoming.utils.isWindows
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +60,7 @@ fun main() = application {
         }
 //        init()
         initOsType()
-        checkFile()
+        writeFile()
         dataInit()
     }
 }
@@ -77,11 +76,11 @@ private fun init(){
 private fun dataInit(){
     CoroutineScope(Dispatchers.Default).launch {
         delay(500)
-        DAOImpl.findAll().forEach{keyValue->
+        PropertiesUtil.all().forEach {entry->
             StateKeyValue.sList.forEach {
-                if (it.first == keyValue.k){
-                    StateKeyValue.getMap()[it.first]?.value = keyValue.v
-                    println("key = ${keyValue.k},value = ${keyValue.v}")
+                if (it.first == entry.key){
+                    StateKeyValue.getMap()[it.first]?.value = entry.value.toString()
+                    println("key = ${it.first},value = ${entry.value}")
                 }
             }
         }
@@ -90,21 +89,20 @@ private fun dataInit(){
 
 }
 
-private fun checkFile(){
-    if (isWindows){
-        val file = File(File(GlobalState.sHomePath, "AdbTool"), "adb.exe")
+/**
+ * 写入必需文件
+ */
+private fun writeFile(){
+    val adb = Pair(if (isWindows) "adb.exe" else "adb","adb")
+    val properties = Pair("cfg.properties","cfg")
+    val listFile = listOf(adb,properties)
+    listFile.forEach {
+        val file = File(GlobalState.workDir, it.first)
         if (!file.exists()){
             file.createNewFile()
-            useResource("adb/adb.exe") {
-                it.copyTo(file.outputStream())
-            }
-        }
-    }else if (isMac){
-        val file = File(File(GlobalState.sHomePath, "AdbTool"), "adb")
-        if (!file.exists()){
-            file.createNewFile()
-            useResource("adb/adb") {
-                it.copyTo(file.outputStream())
+            file.setExecutable(true)
+            useResource(it.second + "/" + it.first) {inputStream->
+                inputStream.copyTo(file.outputStream())
             }
         }
     }

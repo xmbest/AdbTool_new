@@ -10,6 +10,8 @@ version = "1.0-SNAPSHOT"
 val appVersion = "1.0.1"
 val exposedVersion: String by project
 repositories {
+    maven ("https://maven.aliyun.com/repository/public/")
+    maven ("https://maven.aliyun.com/repository/central")
     google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -26,10 +28,6 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation("com.android.tools.ddms:ddmlib:31.3.1")
                 implementation("ch.qos.logback:logback-classic:1.2.3")
-                implementation("org.xerial:sqlite-jdbc:3.8.9.1")
-                implementation("org.jetbrains.exposed:exposed-core:0.51.1")
-                implementation("org.jetbrains.exposed:exposed-dao:0.51.1")
-                implementation("org.jetbrains.exposed:exposed-jdbc:0.51.1")
             }
         }
         val jvmTest by getting

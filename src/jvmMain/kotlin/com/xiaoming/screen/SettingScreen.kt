@@ -1,4 +1,4 @@
-package com.xiaming.screen
+package com.xiaoming.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
@@ -10,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.xiaoming.db.DAOImpl
 import com.xiaoming.module.AdbModule
 import com.xiaoming.state.GlobalState
 import com.xiaoming.state.StateKeyValue
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.utils.PathSelectorUtil
+import com.xiaoming.utils.PropertiesUtil
 import config.route_left_background
 import config.route_left_item_clicked_color
 import config.route_left_item_color
@@ -41,7 +41,7 @@ fun SettingScreen() {
                 ) {
                     GlobalState.adbSelect.value = it.first
                     CoroutineScope(Dispatchers.Default).launch {
-                        DAOImpl.putString(StateKeyValue.sAdbSelect.first,it.first)
+                        PropertiesUtil.setValue(StateKeyValue.sAdbSelect.first,it.first)
                         AdbModule.changeAdb(it.first)
                     }
                 }
@@ -65,7 +65,7 @@ fun SettingScreen() {
                                 if (path.isNotBlank()) {
                                     GlobalState.adbCustomPath.value = path
                                     CoroutineScope(Dispatchers.Default).launch {
-                                        DAOImpl.putString(StateKeyValue.sAdbCustomPath.first,path)
+                                        PropertiesUtil.setValue(StateKeyValue.sAdbCustomPath.first,path)
                                     }
                                 }
                             },
