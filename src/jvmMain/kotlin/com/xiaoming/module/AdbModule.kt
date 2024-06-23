@@ -7,7 +7,7 @@ import com.android.ddmlib.internal.DeviceImpl
 import com.xiaoming.entity.DeviceInfo
 import com.xiaoming.screen.deviceInfo
 import com.xiaoming.state.GlobalState
-import com.xiaoming.state.StateKeyValue
+import com.xiaoming.state.LocalDataKey
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.utils.LogUtil
 import com.xiaoming.utils.isWindows
@@ -112,11 +112,11 @@ object AdbModule {
      */
     fun changeAdb(value: String) {
         when (value) {
-            StateKeyValue.DEFAULT.first -> {
+            LocalDataKey.DEFAULT.first -> {
                 GlobalState.adb.value = File(File(GlobalState.sHomePath, "AdbTool"), if (isWindows) "adb.exe" else "adb").absolutePath
             }
 
-            StateKeyValue.ENV.first -> {
+            LocalDataKey.ENV.first -> {
                 GlobalState.adb.value = "adb"
             }
 
@@ -130,7 +130,8 @@ object AdbModule {
             GlobalState.adb.value = "adb"
         }
 
-        println("init adb = ${GlobalState.adb.value}")
+        GlobalState.sDeviceSet.clear()
+        GlobalState.sCurrentDevice.value = null
         AndroidDebugBridge.terminate()
         init()
     }
@@ -139,7 +140,7 @@ object AdbModule {
      * ddmslib 初始化
      */
     fun init() {
-        LogUtil.d("init")
+        LogUtil.d("init adb = ${GlobalState.adb.value}")
         AndroidDebugBridge.addDeviceChangeListener(object : AndroidDebugBridge.IDeviceChangeListener {
             override fun deviceConnected(device: IDevice?) {
                 device?.let {

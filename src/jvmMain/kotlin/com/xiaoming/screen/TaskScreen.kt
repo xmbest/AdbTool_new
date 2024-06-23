@@ -26,7 +26,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import com.xiaoming.entity.Task
 import com.xiaoming.state.GlobalState
-import com.xiaoming.state.StateKeyValue
+import com.xiaoming.state.LocalDataKey
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.utils.PropertiesUtil
 import com.xiaoming.widget.Toast
@@ -34,7 +34,6 @@ import config.route_left_item_color
 import kotlinx.coroutines.*
 import theme.GOOGLE_BLUE
 import theme.GOOGLE_RED
-import kotlin.math.max
 
 val checkA = mutableStateOf(true)
 val taskList = mutableStateListOf<Task>()
@@ -124,7 +123,7 @@ fun TaskItem(task: Task, index: Int, needBtn: Boolean = true, checked: ((Boolean
                 onClick = {
                     kill(getPid(task))
                 },
-                modifier = Modifier.height(42.dp).width(66.dp)
+                modifier = Modifier.height(42.dp)
             ) {
                 Text(text = "stop", color = Color.White)
             }
@@ -171,7 +170,7 @@ fun TaskNav() {
             placeholder = { Text("keyword") },
             onValueChange = { GlobalState.sTaskKeyWords.value = it },
             singleLine = true,
-            modifier = Modifier.weight(1f).height(48.dp).padding(end = 10.dp).onKeyEvent {
+            modifier = Modifier.weight(1f).height(52.dp).padding(end = 10.dp).onKeyEvent {
                 if (it.key.keyCode == Key.Enter.keyCode) {
                     findTask()
                     return@onKeyEvent true
@@ -183,7 +182,7 @@ fun TaskNav() {
             onClick = {
                 findTask()
             },
-            modifier = Modifier.height(42.dp).width(66.dp)
+            modifier = Modifier.height(42.dp)
         ) {
             Text(text = "sync", color = Color.White)
         }
@@ -193,7 +192,7 @@ fun TaskNav() {
             onClick = {
                 stopArr()
             },
-            modifier = Modifier.height(42.dp).width(66.dp)
+            modifier = Modifier.height(42.dp)
         ) {
             Text(text = "stop", color = Color.White)
         }
@@ -207,7 +206,7 @@ fun TaskNav() {
 fun findTask() {
     CoroutineScope(Dispatchers.Default).launch {
         // 存储关键词
-        PropertiesUtil.setValue(StateKeyValue.sTaskSearchKeyWords.first,GlobalState.sTaskKeyWords.value)
+        PropertiesUtil.setValue(LocalDataKey.sTaskSearchKeyWords.first,GlobalState.sTaskKeyWords.value)
         AdbUtil.findProcessByKeyword(GlobalState.sTaskKeyWords.value, checkA.value) { list ->
             // 搜索归位
             taskTitle.value = taskTitle.value.copy(checked = false)

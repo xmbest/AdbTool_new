@@ -50,13 +50,19 @@ object AdbUtil {
         }
     }
 
+    fun devices(){
+        CoroutineScope(Dispatchers.Default).launch {
+            BashUtil.execCommand("${GlobalState.adb.value} devices")
+        }
+    }
+
     /**
      * 无需结果的cmd命令
      * @param cmd shell命令
      */
     fun shell(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
-            LogUtil.d("adb shell \"$cmd\"")
+            LogUtil.d("${GlobalState.adb.value} shell \"$cmd\"")
             GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
                 override fun isCancelled(): Boolean = false
                 override fun processNewLines(lines: Array<out String>?) {
@@ -86,14 +92,14 @@ object AdbUtil {
                         val str = lines.filter { line -> line.isNotEmpty() }.joinToString("\n")
                         if (str.isNotBlank()) {
                             suspendSingle.resume(str)
-                            LogUtil.d("adb shell \"$cmd\"\n$str")
+                            LogUtil.d("${GlobalState.adb.value} shell \"$cmd\"\n$str")
                         }
                     }
                 }
             })
             delay(timeMillis)
             if (isActive && !resume) {
-                LogUtil.d("adb shell '$cmd' timout,timeout = $timeMillis")
+                LogUtil.d("${GlobalState.adb.value} shell '$cmd' timout,timeout = $timeMillis")
                 resume = true
                 suspendSingle.resume("")
             }
@@ -140,14 +146,9 @@ object AdbUtil {
                 val currentDateTime = LocalDateTime.now()
                 val formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss")
                 val fileName = currentDateTime.format(formatter) + ".png"
-                val desktop =
-                    if (GlobalState.sDesktopPath.value.contains("Desktop")) File(GlobalState.sDesktopPath.value) else File(
-                        GlobalState.sDesktopPath.value,
-                        "Desktop"
-                    )
                 val screenshot = it.screenshot.asBufferedImage()
                 ClipboardUtils.setClipboardImage(screenshot)
-                ImageIO.write(screenshot, "png", File(desktop, fileName))
+                ImageIO.write(screenshot, "png", File(GlobalState.sFileSavePath.value, fileName))
             }
         }
     }
@@ -197,16 +198,9 @@ object AdbUtil {
      * @param packageName 包名
      */
     fun forceStop(packageName: String) {
-        LogUtil.d("adb shell am force-stop $packageName")
+        LogUtil.d("${GlobalState.adb.value} shell am force-stop $packageName")
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.forceStop(packageName)
-        }
-    }
-
-    fun kill(pids: String) {
-        LogUtil.d("adb shell am force-stop $pids")
-        CoroutineScope(Dispatchers.Default).launch {
-            GlobalState.sCurrentDevice.value?.kill(pids)
         }
     }
 

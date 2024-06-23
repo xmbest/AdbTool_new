@@ -15,7 +15,7 @@ import com.xiaoming.module.AdbModule
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.router.Router
 import com.xiaoming.state.GlobalState
-import com.xiaoming.state.StateKeyValue
+import com.xiaoming.state.LocalDataKey
 import com.xiaoming.utils.PropertiesUtil
 import com.xiaoming.utils.initOsType
 import com.xiaoming.utils.isWindows
@@ -53,14 +53,13 @@ fun main() = application {
         state = state,
         icon = painterResource(ImgUtil.getLogoByBrand(""))
     ) {
-        App()
         LaunchedEffect(state) {
             snapshotFlow { state.isMinimized }
                 .onEach(::onMinimized).launchIn(this)
         }
-//        init()
         initOsType()
         writeFile()
+        App()
         dataInit()
     }
 }
@@ -75,15 +74,17 @@ private fun init(){
 
 private fun dataInit(){
     CoroutineScope(Dispatchers.Default).launch {
-        delay(500)
+        delay(10)
         PropertiesUtil.all().forEach {entry->
-            StateKeyValue.sList.forEach {
-                if (it.first == entry.key){
-                    StateKeyValue.getMap()[it.first]?.value = entry.value.toString()
+            LocalDataKey.sList.forEach {
+                if (it.first == entry.key.toString()){
+                    LocalDataKey.getMap()[it.first]?.value = entry.value.toString()
                     println("key = ${it.first},value = ${entry.value}")
                 }
             }
         }
+        // 设置启动页
+        GlobalState.sCurrentIndex.value = GlobalState.sDefaultStartIndex.value.toInt()
         AdbModule.changeAdb(GlobalState.adbSelect.value)
     }
 

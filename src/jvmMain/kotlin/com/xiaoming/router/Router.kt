@@ -105,7 +105,7 @@ fun Left(modifier: Modifier) {
                         null,
                         tint = route_left_item_color,
                         modifier = Modifier.clickable {
-                            AdbUtil.shellByProcess("devices")
+                            AdbUtil.devices()
                         }
                     )
                 },

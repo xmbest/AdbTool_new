@@ -20,6 +20,9 @@ object LogUtil {
         val date = sdf.format(Date())
         val str = String.format("%s ${level.priorityLetter} %s", date, msg)
         println(str)
+        if (GlobalState.saveLog.value == "1"){
+            flush(str)
+        }
     }
 
     fun d(msg: String) {

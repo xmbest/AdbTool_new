@@ -286,6 +286,39 @@ fun FileView(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FileTool(path: String, parentPath: String? = "", name: String = "", isParentTool: Boolean = false) {
+    if (isParentTool) {
+        TooltipArea(tooltip = {
+            Text("Jump to the copied path")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("jump")),
+                null,
+                modifier = Modifier.size(50.dp).clickable {
+                    var path = ClipboardUtils.getSysClipboardText() ?: ""
+                    CoroutineScope(Dispatchers.Default).launch {
+                        val res = AdbUtil.shell("ls $path", 50)
+                        LogUtil.d("res = $res")
+                        if (path.trim()
+                                .isBlank() || res.contains("No such file or directory") || res.contains("syntax error")
+                        ) {
+                            Toast.show("无效路径")
+                            return@launch
+                        } else {
+                            path = path.substring(0, path.lastIndexOf("/"))
+                            while (path.startsWith("/")) {
+                                path = path.substring(path.indexOf("/") + 1, path.length)
+                                LogUtil.d(path)
+                            }
+                            LogUtil.d(path)
+                            currentPath.value = path
+                        }
+                    }
+                }.padding(10.dp),
+                tint = GOOGLE_BLUE
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+    }
     TooltipArea(tooltip = {
         Text("copy absolutePath")
     }) {

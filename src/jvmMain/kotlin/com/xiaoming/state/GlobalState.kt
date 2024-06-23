@@ -33,21 +33,24 @@ object GlobalState{
     val sExpanded = mutableStateOf(false)
     // 当前选中的页码
     val sCurrentIndex = mutableStateOf(0)
-    // 桌面位置
-    val sDesktopPath = mutableStateOf(FileSystemView.getFileSystemView().homeDirectory.absolutePath)
+    val sDefaultStartIndex = mutableStateOf(LocalDataKey.sDefaultPageIndex.second)
+    // 文件保存路径
+    val sFileSavePath = mutableStateOf(LocalDataKey.sFileSavePath.second)
     // 文件存储路径
     val sHomePath: String = System.getProperty("user.home")
     // 任务管理搜索关键词
-    val sTaskKeyWords = mutableStateOf(StateKeyValue.sTaskSearchKeyWords.second)
+    val sTaskKeyWords = mutableStateOf(LocalDataKey.sTaskSearchKeyWords.second)
     // adb 选项
-    val adbSelect = mutableStateOf(StateKeyValue.sAdbSelect.second)
+    val adbSelect = mutableStateOf(LocalDataKey.sAdbSelect.second)
     // 自定义adb路径
-    val adbCustomPath = mutableStateOf(StateKeyValue.sAdbCustomPath.second)
+    val adbCustomPath = mutableStateOf(LocalDataKey.sAdbCustomPath.second)
     // adb执行路径
     val adb = mutableStateOf("adb")
     // 是否保存日志
-    val saveLog = mutableStateOf(false)
+    val saveLog = mutableStateOf(LocalDataKey.sSaveLog.second)
     val port = mutableStateOf("5555")
     // 文件写入目录
-    val workDir = File(sHomePath,"AdbTool").absolutePath
+    val workDir: String = File(sHomePath,"AdbTool").absolutePath
+
+
 }

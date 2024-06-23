@@ -210,7 +210,7 @@ fun QuickScreen() {
                     }
                 }
                 ContentNRow {
-                    Item(getRealLocation("go"), "授予所有权限", false) {
+                    Item(getRealLocation("grant"), "授予所有权限", false) {
                         conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
                             SimpleDialog.confirm("授予${packageName.value}应用所有权限?") {
                                 CoroutineScope(Dispatchers.Default).launch {
@@ -223,7 +223,7 @@ fun QuickScreen() {
                         }
                     }
 
-                    Item(getRealLocation("back"), "撤销所有权限", false) {
+                    Item(getRealLocation("undo"), "撤销所有权限", false) {
                         conditionExe(packageName.value.isNotBlank(), "请先选择应用") {
                             SimpleDialog.confirm("撤销${packageName.value}应用所有权限?") {
                                 CoroutineScope(Dispatchers.Default).launch {

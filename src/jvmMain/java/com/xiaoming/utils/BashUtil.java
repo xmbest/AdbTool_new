@@ -9,7 +9,7 @@ import java.util.List;
 public class BashUtil {
 
     public static String execCommand(String command) throws IOException, InterruptedException {
-        return execCommand(command, GlobalState.INSTANCE.getSDesktopPath().getValue());
+        return execCommand(command, GlobalState.INSTANCE.getSHomePath());
     }
 
 
