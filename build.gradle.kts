@@ -27,6 +27,7 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation("com.android.tools.ddms:ddmlib:31.3.1")
+                implementation("com.github.mifmif:generex:1.0.2")
             }
         }
         val jvmTest by getting
