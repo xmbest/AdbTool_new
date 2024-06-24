@@ -302,7 +302,7 @@ object AdbUtil {
                     FileUtil.writeShell("pull", "${GlobalState.adb.value} -s $it pull $remote $local/")
                     BashUtil.execCommand("open -b com.apple.terminal ${GlobalState.workDir + "/" + "pull.sh"}")
                 } else if (isWindows) {
-
+                    BashUtil.execCommand("cmd.exe /c start cmd.exe /K ${GlobalState.adb.value} -s $it pull $remote $local/")
                 } else {
                     shellByProcess("pull $remote $local/")
                 }
@@ -323,7 +323,7 @@ object AdbUtil {
                     FileUtil.writeShell("push", "${GlobalState.adb.value} -s $it push $local $remote/")
                     BashUtil.execCommand("open -b com.apple.terminal ${GlobalState.workDir + "/" + "push.sh"}")
                 } else if (isWindows) {
-
+                    BashUtil.execCommand("cmd.exe /c start cmd.exe /K ${GlobalState.adb.value} -s $it push $local $remote/")
                 } else {
                     shellByProcess("push $local $remote/")
                 }
