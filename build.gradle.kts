@@ -39,7 +39,8 @@ compose.desktop {
             modules("java.compiler", "java.instrument", "java.management", "jdk.unsupported")
         }
         buildTypes.release.proguard {
-            isEnabled.set(false)
+//            isEnabled.set(false)
+            configurationFiles.from(project.file("compose-desktop.pro"))
         }
         mainClass = "MainKt"
         nativeDistributions {
