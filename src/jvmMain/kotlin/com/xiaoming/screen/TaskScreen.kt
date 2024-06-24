@@ -125,7 +125,7 @@ fun TaskItem(task: Task, index: Int, needBtn: Boolean = true, checked: ((Boolean
                 },
                 modifier = Modifier.height(42.dp)
             ) {
-                Text(text = "stop", color = Color.White)
+                Text(text = "kill", color = Color.White)
             }
         }
 
@@ -194,7 +194,7 @@ fun TaskNav() {
             },
             modifier = Modifier.height(42.dp)
         ) {
-            Text(text = "stop", color = Color.White)
+            Text(text = "kill", color = Color.White)
         }
     }
 }

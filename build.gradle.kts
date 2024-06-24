@@ -7,7 +7,7 @@ plugins {
 
 group = "com.xiaoming"
 version = "1.0-SNAPSHOT"
-val appVersion = "1.0.2"
+val appVersion = "1.0.3"
 val exposedVersion: String by project
 repositories {
     maven ("https://maven.aliyun.com/repository/public/")

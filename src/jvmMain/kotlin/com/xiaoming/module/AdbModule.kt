@@ -44,7 +44,7 @@ object AdbModule {
                     "cat /proc/cpuinfo | grep processor | wc -l",
                     200
                 ) + ")"
-                info.systemVersion = it.getProperty("ro.bootimage.build.fingerprint")
+                info.systemVersion = it.getProperty("ro.bootimage.build.fingerprint")?:""
                 info.androidVersion = it.getProperty("ro.vendor.build.version.release")
                 if (info.androidVersion.isBlank()) {
                     info.androidVersion = it.getProperty("ro.build.version.release")
@@ -72,10 +72,10 @@ object AdbModule {
         } else {
             GlobalState.sCurrentDevice.value = device as DeviceImpl
             loadDeviceInfo()
+            AdbUtil.root()
             GlobalState.sCurrentDevice.value?.let {
                 GlobalState.sFileListingService.value = FileListingService(it)
             }
-
         }
     }
 

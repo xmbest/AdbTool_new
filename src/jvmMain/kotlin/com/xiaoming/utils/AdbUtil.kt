@@ -159,7 +159,7 @@ object AdbUtil {
     fun root() {
         CoroutineScope(Dispatchers.Default).launch {
             LogUtil.d("adb root")
-            GlobalState.sCurrentDevice.value?.root()
+            shellByProcess("root")
         }
     }
 
