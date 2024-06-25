@@ -15,7 +15,6 @@ object GlobalState{
         Page("常用功能", ImgUtil.getRealLocation("pin")) { QuickScreen() },
         Page("进程管理", ImgUtil.getRealLocation("process")) { TaskScreen() },
         Page("文件管理", ImgUtil.getRealLocation("folder")) { FileScreen() },
-        Page("快捷指令", ImgUtil.getRealLocation("quick")) { OrderScreen() },
         Page("快捷广播", ImgUtil.getRealLocation("broad")) { BroadScreen() },
         Page("命令泛化", ImgUtil.getRealLocation("generalize")) { CommandScreen() },
         Page("程序设置", ImgUtil.getRealLocation("settings")) { SettingScreen() }
