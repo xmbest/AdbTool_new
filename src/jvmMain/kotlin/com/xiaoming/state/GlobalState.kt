@@ -4,15 +4,10 @@ import androidx.compose.runtime.mutableStateOf
 import com.android.ddmlib.FileListingService
 import com.android.ddmlib.IDevice
 import com.android.ddmlib.internal.DeviceImpl
-import com.xiaoming.screen.FileScreen
-import com.xiaoming.screen.SettingScreen
 import com.xiaoming.utils.ImgUtil
 import com.xiaoming.entity.Page
-import com.xiaoming.screen.TaskScreen
-import com.xiaoming.screen.OrderScreen
-import com.xiaoming.screen.QuickScreen
+import com.xiaoming.screen.*
 import java.io.File
-import javax.swing.filechooser.FileSystemView
 
 object GlobalState{
     // 配置布局列表数据
@@ -20,7 +15,7 @@ object GlobalState{
         Page("常用功能", ImgUtil.getRealLocation("pin")) { QuickScreen() },
         Page("进程管理", ImgUtil.getRealLocation("process")) { TaskScreen() },
         Page("文件管理", ImgUtil.getRealLocation("folder")) { FileScreen() },
-        Page("快捷指令", ImgUtil.getRealLocation("order")) { OrderScreen() },
+        Page("快捷广播", ImgUtil.getRealLocation("broad")) { BroadScreen() },
         Page("程序设置", ImgUtil.getRealLocation("settings")) { SettingScreen() }
     )
     // 已连接设备列表
