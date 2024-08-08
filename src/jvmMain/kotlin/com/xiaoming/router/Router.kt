@@ -38,11 +38,11 @@ fun Router() {
         Toast()
         if (showingSimpleDialog.value) {
             SimpleDialog(
-                title = title.value,
-                titleColor = titleColor.value,
-                contentText = contentText.value,
-                needCancel = needCancel.value,
-                callback = callback.value
+                title = simpleTitle.value,
+                titleColor = simpleTitleColor.value,
+                contentText = simpleContentText.value,
+                needCancel = simpleNeedCancel.value,
+                callback = simpleCallback.value
             )
         }
 
@@ -51,7 +51,7 @@ fun Router() {
                 title = inputTitleText.value,
                 titleColor = inputTitleColor.value,
                 hint = inputHintText.value,
-                runnable = inputCallback.value,
+                callback = inputCallback.value,
             )
         }
     }
