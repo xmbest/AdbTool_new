@@ -1,10 +1,29 @@
 package com.xiaoming.utils
 
+/**
+ * 是否 MAC
+ */
 var isMac = false
+
+/**
+ * 是否 Windows
+ */
 var isWindows = false
-var isOther = false
+
+/**
+ * 是否 Linux
+ */
 var isLinux = false
 
+/**
+ * Other
+ */
+var isOther = false
+
+
+/**
+ * 初始化系统类别
+ */
 fun initOsType(){
     val type = System.getProperty("os.name").uppercase()
     return with(type){
@@ -16,3 +35,8 @@ fun initOsType(){
         }
     }
 }
+
+/**
+ * 获取 adb
+ */
+fun getAdb() = if (isWindows) "adb.exe" else "adb"

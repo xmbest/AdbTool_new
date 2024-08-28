@@ -12,5 +12,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "AdbTool"
+rootProject.name = "adbTool"
 
