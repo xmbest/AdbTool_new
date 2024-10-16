@@ -205,6 +205,17 @@ object AdbUtil {
     }
 
     /**
+     * 根据包名kill应用
+     * @param packageName 包名
+     */
+    fun kill(packageName: String){
+        LogUtil.d("${GlobalState.adb.value} shell kill $packageName")
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.kill(packageName)
+        }
+    }
+
+    /**
      * 根据包名清空应用数据
      * @param packageName 包名
      */
