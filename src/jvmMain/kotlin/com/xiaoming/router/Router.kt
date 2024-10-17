@@ -13,12 +13,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.xiaoming.config.*
 import com.xiaoming.module.AdbModule
 import com.xiaoming.utils.ImgUtil.getRealLocation
 import com.xiaoming.widget.*
 import com.xiaoming.state.GlobalState
 import com.xiaoming.utils.AdbUtil
-import config.*
 
 @Composable
 fun Router() {

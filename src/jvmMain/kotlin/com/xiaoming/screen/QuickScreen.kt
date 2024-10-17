@@ -27,7 +27,7 @@ import com.xiaoming.utils.ImgUtil
 import com.xiaoming.utils.ImgUtil.getRealLocation
 import com.xiaoming.utils.LogUtil
 import com.xiaoming.widget.*
-import config.route_left_item_color
+import com.xiaoming.config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

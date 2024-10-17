@@ -31,7 +31,7 @@ import com.xiaoming.state.GlobalState
 import com.xiaoming.state.LocalDataKey
 import com.xiaoming.utils.*
 import com.xiaoming.widget.Toast
-import config.route_left_item_color
+import com.xiaoming.config.route_left_item_color
 import kotlinx.coroutines.*
 import theme.GOOGLE_BLUE
 import theme.GOOGLE_GREEN

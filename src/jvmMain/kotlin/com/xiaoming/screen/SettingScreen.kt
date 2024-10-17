@@ -20,9 +20,9 @@ import com.xiaoming.utils.ImgUtil
 import com.xiaoming.utils.LogUtil
 import com.xiaoming.utils.PathSelectorUtil
 import com.xiaoming.utils.PropertiesUtil
-import config.route_left_background
-import config.route_left_item_clicked_color
-import config.route_left_item_color
+import com.xiaoming.config.route_left_background
+import com.xiaoming.config.route_left_item_clicked_color
+import com.xiaoming.config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

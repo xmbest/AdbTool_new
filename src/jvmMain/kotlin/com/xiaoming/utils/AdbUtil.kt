@@ -63,7 +63,7 @@ object AdbUtil {
     fun shell(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
             LogUtil.d("${GlobalState.adb.value} shell \"$cmd\"")
-            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
+            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd.replace("adb shell",""), object : MultiLineReceiver() {
                 override fun isCancelled(): Boolean = false
                 override fun processNewLines(lines: Array<out String>?) {
                     lines?.forEach {

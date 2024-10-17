@@ -1,4 +1,4 @@
-package config
+package com.xiaoming.config
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
