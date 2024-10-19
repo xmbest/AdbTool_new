@@ -30,7 +30,6 @@ import com.xiaoming.widget.*
 import com.xiaoming.config.route_left_item_color
 import com.xiaoming.theme.*
 import kotlinx.coroutines.*
-import com.xiaoming.theme.*
 
 /**
  * 文件列表
@@ -139,10 +138,9 @@ fun FileScreen() {
 
 /**
  * 切换视图
- * @param path 需要展示的路径
  */
 fun findFile() {
-    AdbUtil.findFileList(currentPath.value) { entry, children ->
+    AdbUtil.findFileList(currentPath.value) { _, children ->
         {
             LogUtil.d("findFile callback")
             fileList.clear()
@@ -295,23 +293,23 @@ fun FileTool(path: String, parentPath: String? = "", name: String = "", isParent
                 painter = painterResource(ImgUtil.getRealLocation("jump")),
                 null,
                 modifier = Modifier.size(50.dp).clickable {
-                    var path = ClipboardUtils.getSysClipboardText() ?: ""
+                    var value = ClipboardUtils.getSysClipboardText() ?: ""
                     CoroutineScope(Dispatchers.Default).launch {
-                        val res = AdbUtil.shell("ls $path", 50)
+                        val res = AdbUtil.shell("ls $value", 50)
                         LogUtil.d("res = $res")
-                        if (path.trim()
+                        if (value.trim()
                                 .isBlank() || res.contains("No such file or directory") || res.contains("syntax error")
                         ) {
                             Toast.show("无效路径")
                             return@launch
                         } else {
-                            path = path.substring(0, path.lastIndexOf("/"))
-                            while (path.startsWith("/")) {
-                                path = path.substring(path.indexOf("/") + 1, path.length)
-                                LogUtil.d(path)
+                            value = value.substring(0, value.lastIndexOf("/"))
+                            while (value.startsWith("/")) {
+                                value = value.substring(value.indexOf("/") + 1, value.length)
+                                LogUtil.d(value)
                             }
-                            LogUtil.d(path)
-                            currentPath.value = path
+                            LogUtil.d(value)
+                            currentPath.value = value
                         }
                     }
                 }.padding(10.dp),
