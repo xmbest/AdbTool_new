@@ -1,6 +1,7 @@
 package com.xiaoming.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,17 +24,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.xiaoming.entity.Task
 import com.xiaoming.state.GlobalState
 import com.xiaoming.state.LocalDataKey
-import com.xiaoming.utils.AdbUtil
-import com.xiaoming.utils.PropertiesUtil
+import com.xiaoming.utils.*
 import com.xiaoming.widget.Toast
-import config.route_left_item_color
+import com.xiaoming.config.route_left_item_color
 import kotlinx.coroutines.*
-import theme.GOOGLE_BLUE
-import theme.GOOGLE_RED
+import com.xiaoming.theme.GOOGLE_BLUE
+import com.xiaoming.theme.GOOGLE_GREEN
+import com.xiaoming.theme.GOOGLE_RED
+import com.xiaoming.theme.GOOGLE_YELLOW
 
 val checkA = mutableStateOf(true)
 val taskList = mutableStateListOf<Task>()
@@ -92,6 +95,7 @@ fun TaskScreen() {
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskItem(task: Task, index: Int, needBtn: Boolean = true, checked: ((Boolean) -> Unit)? = null) {
     Row(
@@ -118,21 +122,38 @@ fun TaskItem(task: Task, index: Int, needBtn: Boolean = true, checked: ((Boolean
         }
 
         if (needBtn) {
-            Button(
-                colors = ButtonDefaults.buttonColors(backgroundColor = GOOGLE_RED),
-                onClick = {
-                    kill(getPid(task))
-                },
-                modifier = Modifier.height(42.dp)
-            ) {
-                Text(text = "kill", color = Color.White)
+            TooltipArea(tooltip = {
+                Text("kill process")
+            }) {
+                Icon(
+                    painter = painterResource(ImgUtil.getRealLocation("kill")),
+                    "icon",
+                    tint = GOOGLE_YELLOW,
+                    modifier = Modifier.size(42.dp).clickable {
+                        kill(getPid(task))
+                    }.padding(4.dp)
+                )
             }
+
+            TooltipArea(tooltip = {
+                Text("force stop process")
+            }) {
+                Icon(
+                    painter = painterResource(ImgUtil.getRealLocation("stop")),
+                    "icon",
+                    tint = GOOGLE_RED,
+                    modifier = Modifier.size(42.dp).clickable {
+                        forceStop(getName(task))
+                    }.padding(0.dp)
+                )
+            }
+
         }
 
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun TaskNav() {
     Row(
@@ -178,24 +199,46 @@ fun TaskNav() {
                 return@onKeyEvent false
             }
         )
-        Button(
-            onClick = {
-                findTask()
-            },
-            modifier = Modifier.height(42.dp)
-        ) {
-            Text(text = "sync", color = Color.White)
+        TooltipArea(tooltip = {
+            Text("refresh")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("reload")),
+                "icon",
+                tint = GOOGLE_GREEN,
+                modifier = Modifier.size(50.dp).clickable {
+                    findTask()
+                }.padding(8.dp)
+            )
         }
-        Spacer(modifier = Modifier.width(10.dp))
-        Button(
-            colors = ButtonDefaults.buttonColors(backgroundColor = GOOGLE_RED),
-            onClick = {
-                stopArr()
-            },
-            modifier = Modifier.height(42.dp)
-        ) {
-            Text(text = "kill", color = Color.White)
+
+        TooltipArea(tooltip = {
+            Text("kill process")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("kill")),
+                "icon",
+                tint = GOOGLE_YELLOW,
+                modifier = Modifier.size(50.dp).clickable {
+                    stopArrByPid()
+                }.padding(8.dp)
+            )
         }
+
+        TooltipArea(tooltip = {
+            Text("force stop process")
+        }) {
+            Icon(
+                painter = painterResource(ImgUtil.getRealLocation("stop")),
+                "icon",
+                tint = GOOGLE_RED,
+                modifier = Modifier.size(50.dp).clickable {
+                    stopArrByName()
+                }.padding(4.dp)
+            )
+        }
+
+
     }
 }
 
@@ -206,7 +249,7 @@ fun TaskNav() {
 fun findTask() {
     CoroutineScope(Dispatchers.Default).launch {
         // 存储关键词
-        PropertiesUtil.setValue(LocalDataKey.sTaskSearchKeyWords.first,GlobalState.sTaskKeyWords.value)
+        PropertiesUtil.setValue(LocalDataKey.sTaskSearchKeyWords.first, GlobalState.sTaskKeyWords.value)
         AdbUtil.findProcessByKeyword(GlobalState.sTaskKeyWords.value, checkA.value) { list ->
             // 搜索归位
             taskTitle.value = taskTitle.value.copy(checked = false)
@@ -219,13 +262,13 @@ fun findTask() {
 }
 
 /**
- * 停止多个任务
+ * 停止多个任务pid
  */
-fun stopArr() {
+fun stopArrByPid() {
     CoroutineScope(Dispatchers.Default).launch {
         val list = taskList.filter { it.checked }.map { getPid(it) }
         if (list.isEmpty()) {
-            Toast.show("至少选中一个")
+            Toast.show("Please select at least one.")
         } else {
             runBlocking {
                 kill(list.joinToString(" "))
@@ -235,6 +278,24 @@ fun stopArr() {
         }
     }
 
+}
+
+/**
+ * 停止多个任务packagename
+ */
+fun stopArrByName() {
+    CoroutineScope(Dispatchers.Default).launch {
+        val list = taskList.filter { it.checked }.map { getName(it) }
+        if (list.isEmpty()) {
+            Toast.show("Please select at least one.")
+        } else {
+            list.forEach {
+                forceStop(it)
+            }
+            delay(100)
+            findTask()
+        }
+    }
 }
 
 
@@ -251,13 +312,31 @@ fun kill(pids: String) {
 
 
 /**
+ * 根据 packageName 强制停止进程
+ */
+fun forceStop(packageName: String) {
+    runBlocking {
+        AdbUtil.forceStop(packageName)
+    }
+}
+
+
+/**
  * 获取pid
  */
 fun getPid(task: Task): String {
     val contentArr = task.origin.trim().split(" ").filter {
         it.trim().isNotEmpty()
     }
-    return if (contentArr.size > 2) contentArr[1] else ""
+    return if (contentArr.size > 1) contentArr[1] else ""
+}
+
+fun getName(task: Task): String {
+    val contentArr = task.origin.trim().split(" ").filter {
+        it.trim().isNotEmpty()
+    }
+    LogUtil.d("getName contentArr = $contentArr")
+    return if (contentArr.size > 8) contentArr[8] else ""
 }
 
 

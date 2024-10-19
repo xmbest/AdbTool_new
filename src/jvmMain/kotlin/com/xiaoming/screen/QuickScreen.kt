@@ -20,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import com.xiaoming.entity.DeviceInfo
-import com.xiaoming.entity.KeyMapper
 import com.xiaoming.state.GlobalState
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.utils.ClipboardUtils
@@ -28,13 +27,13 @@ import com.xiaoming.utils.ImgUtil
 import com.xiaoming.utils.ImgUtil.getRealLocation
 import com.xiaoming.utils.LogUtil
 import com.xiaoming.widget.*
-import config.route_left_item_color
+import com.xiaoming.config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import theme.GOOGLE_BLUE
-import theme.GOOGLE_GREEN
-import theme.GOOGLE_RED
+import com.xiaoming.theme.GOOGLE_BLUE
+import com.xiaoming.theme.GOOGLE_GREEN
+import com.xiaoming.theme.GOOGLE_RED
 import javax.swing.filechooser.FileSystemView
 
 val packageName = mutableStateOf("")
@@ -46,32 +45,32 @@ val deviceInfo = mutableStateOf(DeviceInfo())
 @OptIn(ExperimentalMaterialApi::class, ExperimentalUnitApi::class)
 @Composable
 fun QuickScreen() {
-    val keyMapperList1 = listOf(
-        KeyMapper(getRealLocation("task"), 187, "任务列表"),
-        KeyMapper(getRealLocation("home"), 3, "回到桌面"),
-        KeyMapper(getRealLocation("back"), 4, "返回上级"),
-        KeyMapper(getRealLocation("power"), 26, "锁定屏幕")
+    val tripleList1s = listOf(
+        Triple(getRealLocation("task"), 187, "任务列表"),
+        Triple(getRealLocation("home"), 3, "回到桌面"),
+        Triple(getRealLocation("back"), 4, "返回上级"),
+        Triple(getRealLocation("power"), 26, "锁定屏幕")
     )
-    val keyMapperList2 = listOf(
-        KeyMapper(getRealLocation("plus"), 24, "增加音量"),
-        KeyMapper(getRealLocation("minus"), 25, "减少音量"),
-        KeyMapper(getRealLocation("up"), 221, "增加亮度"),
-        KeyMapper(getRealLocation("down"), 220, "减少亮度"),
+    val tripleList2s = listOf(
+        Triple(getRealLocation("plus"), 24, "增加音量"),
+        Triple(getRealLocation("minus"), 25, "减少音量"),
+        Triple(getRealLocation("up"), 221, "增加亮度"),
+        Triple(getRealLocation("down"), 220, "减少亮度"),
 
         )
 
-    val keyMapperList3 = listOf(
-        KeyMapper(getRealLocation("down"), 1, "显示状态栏"),
-        KeyMapper(getRealLocation("up"), 2, "隐藏状态栏"),
-        KeyMapper(getRealLocation("image"), 0, "截图"),
-        KeyMapper(getRealLocation("settings"), 0, "进入设置")
+    val tripleList3s = listOf(
+        Triple(getRealLocation("down"), 1, "显示状态栏"),
+        Triple(getRealLocation("up"), 2, "隐藏状态栏"),
+        Triple(getRealLocation("image"), 0, "截图"),
+        Triple(getRealLocation("settings"), 0, "进入设置")
     )
 
-    val keyMapperList4 = listOf(
-        KeyMapper(getRealLocation("eye"), 1, "查看当前Activity"),
-        KeyMapper(getRealLocation("delete"), 2, "清理logcat缓存"),
-        KeyMapper(getRealLocation("open"), 0, "设置端口"),
-        KeyMapper(getRealLocation("reboot"), 0, "重启设备")
+    val tripleList4s = listOf(
+        Triple(getRealLocation("eye"), 1, "查看当前Activity"),
+        Triple(getRealLocation("delete"), 2, "清理logcat缓存"),
+        Triple(getRealLocation("open"), 0, "设置端口"),
+        Triple(getRealLocation("reboot"), 0, "重启设备")
     )
     val scroll = rememberScrollState()
 
@@ -122,37 +121,37 @@ fun QuickScreen() {
         General(title = "按键模拟", height = 4, content = {
             ContentMoreRowColumn {
                 ContentNRow {
-                    keyMapperList1.forEach {
-                        Item(it.icon, it.name) {
-                            AdbUtil.inputKey(it.key)
+                    tripleList1s.forEach {
+                        Item(it.first, it.third) {
+                            AdbUtil.inputKey(it.second)
                         }
                     }
                 }
                 ContentNRow {
-                    keyMapperList2.forEach {
-                        Item(it.icon, it.name) {
-                            AdbUtil.inputKey(it.key)
+                    tripleList2s.forEach {
+                        Item(it.first, it.third) {
+                            AdbUtil.inputKey(it.second)
                         }
                     }
                 }
                 ContentNRow {
-                    Item(keyMapperList3[0].icon, keyMapperList3[0].name) {
+                    Item(tripleList3s[0].first, tripleList3s[0].third) {
                         AdbUtil.shell("service call statusbar 1")
                     }
-                    Item(keyMapperList3[1].icon, keyMapperList3[1].name) {
+                    Item(tripleList3s[1].first, tripleList3s[1].third) {
                         AdbUtil.shell("service call statusbar 2")
 
                         println(FileSystemView.getFileSystemView().homeDirectory.absolutePath)
                     }
-                    Item(keyMapperList3[2].icon, keyMapperList3[2].name) {
+                    Item(tripleList3s[2].first, tripleList3s[2].third) {
                         AdbUtil.screenshot()
                     }
-                    Item(keyMapperList3[3].icon, keyMapperList3[3].name) {
+                    Item(tripleList3s[3].first, tripleList3s[3].third) {
                         AdbUtil.shell("am start  -n com.android.settings/com.android.settings.Settings")
                     }
                 }
                 ContentNRow {
-                    Item(keyMapperList4[0].icon, keyMapperList4[0].name, false) {
+                    Item(tripleList4s[0].first, tripleList4s[0].third, false) {
                         CoroutineScope(Dispatchers.Default).launch {
                             val str = AdbUtil.findCurrentActivity()
                             if (str.isNotBlank()) {
@@ -160,15 +159,15 @@ fun QuickScreen() {
                             }
                         }
                     }
-                    Item(keyMapperList4[1].icon, keyMapperList4[1].name, false) {
+                    Item(tripleList4s[1].first, tripleList4s[1].third, false) {
                         SimpleDialog.confirm("是否清理logcat缓存") {
                             AdbUtil.shell("logcat -c")
                         }
                     }
-                    Item(keyMapperList4[2].icon, keyMapperList4[2].name, false) {
+                    Item(tripleList4s[2].first, tripleList4s[2].third, false) {
                         AdbUtil.tcpip(GlobalState.port.value)
                     }
-                    Item(keyMapperList4[3].icon, keyMapperList4[3].name, false) {
+                    Item(tripleList4s[3].first, tripleList4s[3].third, false) {
                         SimpleDialog.confirm("是否重启设备") {
                             AdbUtil.reboot()
                             Toast.show("重启中....")

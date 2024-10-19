@@ -4,13 +4,20 @@ import com.android.ddmlib.*
 import com.xiaoming.state.GlobalState
 import com.xiaoming.widget.SimpleDialog
 import kotlinx.coroutines.*
-import theme.GOOGLE_YELLOW
+import org.jetbrains.skiko.hostOs
+import com.xiaoming.theme.GOOGLE_YELLOW
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.imageio.ImageIO
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+
+
+/**
+ * 获取 adb
+ */
+fun getAdb() = if (hostOs.isWindows) "adb.exe" else "adb"
 
 object AdbUtil {
 
@@ -63,7 +70,7 @@ object AdbUtil {
     fun shell(cmd: String) {
         CoroutineScope(Dispatchers.Default).launch {
             LogUtil.d("${GlobalState.adb.value} shell \"$cmd\"")
-            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
+            GlobalState.sCurrentDevice.value?.executeShellCommand(cmd.replace("adb shell",""), object : MultiLineReceiver() {
                 override fun isCancelled(): Boolean = false
                 override fun processNewLines(lines: Array<out String>?) {
                     lines?.forEach {
@@ -205,6 +212,17 @@ object AdbUtil {
     }
 
     /**
+     * 根据包名kill应用
+     * @param packageName 包名
+     */
+    fun kill(packageName: String){
+        LogUtil.d("${GlobalState.adb.value} shell kill $packageName")
+        CoroutineScope(Dispatchers.Default).launch {
+            GlobalState.sCurrentDevice.value?.kill(packageName)
+        }
+    }
+
+    /**
      * 根据包名清空应用数据
      * @param packageName 包名
      */
@@ -298,10 +316,10 @@ object AdbUtil {
     fun pull(remote: String, local: String) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.let {
-                if (isMac) {
+                if (hostOs.isMacOS) {
                     FileUtil.writeShell("pull", "${GlobalState.adb.value} -s $it pull $remote $local/")
                     BashUtil.execCommand("open -b com.apple.terminal ${GlobalState.workDir + "/" + "pull.sh"}")
-                } else if (isWindows) {
+                } else if (hostOs.isWindows) {
                     BashUtil.execCommand("cmd.exe /c start cmd.exe /K ${GlobalState.adb.value} -s $it pull $remote $local/")
                 } else {
                     shellByProcess("pull $remote $local/")
@@ -319,10 +337,10 @@ object AdbUtil {
     fun push(local: String, remote: String) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.let {
-                if (isMac) {
+                if (hostOs.isMacOS) {
                     FileUtil.writeShell("push", "${GlobalState.adb.value} -s $it push $local $remote/")
                     BashUtil.execCommand("open -b com.apple.terminal ${GlobalState.workDir + "/" + "push.sh"}")
-                } else if (isWindows) {
+                } else if (hostOs.isWindows) {
                     BashUtil.execCommand("cmd.exe /c start cmd.exe /K ${GlobalState.adb.value} -s $it push $local $remote/")
                 } else {
                     shellByProcess("push $local $remote/")

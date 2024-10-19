@@ -1,6 +1,5 @@
 package com.xiaoming.entity
 
-import com.android.ddmlib.AdbHelper
 
 /**
  * model 代号

@@ -10,24 +10,17 @@ import com.xiaoming.state.GlobalState
 import com.xiaoming.state.LocalDataKey
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.utils.LogUtil
-import com.xiaoming.utils.isWindows
+import com.xiaoming.utils.getAdb
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 
 /**
  * android ddmslib adb
  */
 object AdbModule {
-    private fun convertKBToGB(size: String): String {
-        if (size.isBlank())
-            return ""
-        val df = DecimalFormat("0.00") //格式化小数
-        return df.format(size.toDouble() / 1024 / 1024)
-    }
 
     private fun loadDeviceInfo() {
         LogUtil.d("loadDeviceInfo")
@@ -113,7 +106,7 @@ object AdbModule {
     fun changeAdb(value: String) {
         when (value) {
             LocalDataKey.DEFAULT.first -> {
-                GlobalState.adb.value = File(File(GlobalState.sHomePath, "AdbTool"), if (isWindows) "adb.exe" else "adb").absolutePath
+                GlobalState.adb.value = File(GlobalState.workDir, getAdb()).absolutePath
             }
 
             LocalDataKey.ENV.first -> {
@@ -139,7 +132,7 @@ object AdbModule {
     /**
      * ddmslib 初始化
      */
-    fun init() {
+    private fun init() {
         LogUtil.d("init adb = ${GlobalState.adb.value}")
         AndroidDebugBridge.addDeviceChangeListener(object : AndroidDebugBridge.IDeviceChangeListener {
             override fun deviceConnected(device: IDevice?) {

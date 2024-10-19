@@ -13,12 +13,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.xiaoming.config.*
 import com.xiaoming.module.AdbModule
 import com.xiaoming.utils.ImgUtil.getRealLocation
 import com.xiaoming.widget.*
 import com.xiaoming.state.GlobalState
 import com.xiaoming.utils.AdbUtil
-import config.*
 
 @Composable
 fun Router() {
@@ -38,11 +38,11 @@ fun Router() {
         Toast()
         if (showingSimpleDialog.value) {
             SimpleDialog(
-                title = title.value,
-                titleColor = titleColor.value,
-                contentText = contentText.value,
-                needCancel = needCancel.value,
-                callback = callback.value
+                title = simpleTitle.value,
+                titleColor = simpleTitleColor.value,
+                contentText = simpleContentText.value,
+                needCancel = simpleNeedCancel.value,
+                callback = simpleCallback.value
             )
         }
 
@@ -51,7 +51,7 @@ fun Router() {
                 title = inputTitleText.value,
                 titleColor = inputTitleColor.value,
                 hint = inputHintText.value,
-                runnable = inputCallback.value,
+                callback = inputCallback.value,
             )
         }
     }

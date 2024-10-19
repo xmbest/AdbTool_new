@@ -10,7 +10,9 @@ import com.xiaoming.screen.*
 import java.io.File
 
 object GlobalState{
-    // 配置布局列表数据
+    /**
+     * 页面路由配置
+     */
     val pages = listOf(
         Page("常用功能", ImgUtil.getRealLocation("pin")) { QuickScreen() },
         Page("进程管理", ImgUtil.getRealLocation("process")) { TaskScreen() },
@@ -19,34 +21,82 @@ object GlobalState{
         Page("命令泛化", ImgUtil.getRealLocation("generalize")) { CommandScreen() },
         Page("程序设置", ImgUtil.getRealLocation("settings")) { SettingScreen() }
     )
-    // 已连接设备列表
+
+    /**
+     * 已连接设备列表
+     */
     val sDeviceSet = mutableSetOf<IDevice>()
-    // 当前选中设备
+
+    /**
+     * 当前选中设备
+     */
     val sCurrentDevice = mutableStateOf<DeviceImpl?>(null)
-    // 文件操作service
+
+    /**
+     * 文件操作service
+     * @see FileListingService
+     */
     val sFileListingService = mutableStateOf<FileListingService?>(null)
-    // 设备列表是否展开
+
+    /**
+     * 设备切换列表是否展开
+     */
     val sExpanded = mutableStateOf(false)
-    // 当前选中的页码
+
+    /**
+     * 当前选中路由的页码
+     */
     val sCurrentIndex = mutableStateOf(0)
+
+    /**
+     * 程序默认打开页面
+     */
     val sDefaultStartIndex = mutableStateOf(LocalDataKey.sDefaultPageIndex.second)
-    // 文件保存路径
+
+    /**
+     * 文件保存路径
+      */
     val sFileSavePath = mutableStateOf(LocalDataKey.sFileSavePath.second)
-    // 文件存储路径
+
+    /**
+     * 家目录
+     */
     val sHomePath: String = System.getProperty("user.home")
-    // 任务管理搜索关键词
+
+    /**
+     * 任务管理搜索关键词
+     */
     val sTaskKeyWords = mutableStateOf(LocalDataKey.sTaskSearchKeyWords.second)
-    // adb 选项
+
+    /**
+     * adb 环境配置记忆
+     */
     val adbSelect = mutableStateOf(LocalDataKey.sAdbSelect.second)
-    // 自定义adb路径
+
+    /**
+     * 自定义的 adb 执行程序路径
+     */
     val adbCustomPath = mutableStateOf(LocalDataKey.sAdbCustomPath.second)
-    // adb执行路径
+
+    /**
+     * 真实执行 adb 的执行程序
+     */
     val adb = mutableStateOf("adb")
-    // 是否保存日志
+
+    /**
+     * 是否保存日志开关
+     */
     val saveLog = mutableStateOf(LocalDataKey.sSaveLog.second)
+
+    /**
+     * wifi adb 端口
+     */
     val port = mutableStateOf("5555")
-    // 文件写入目录
-    val workDir: String = File(sHomePath,"AdbTool").absolutePath
+
+    /**
+     * 文件写入目录
+     */
+    val workDir: String = File(sHomePath,".adbTool").absolutePath
 
 
 }

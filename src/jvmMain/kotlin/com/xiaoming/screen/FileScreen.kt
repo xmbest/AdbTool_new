@@ -27,7 +27,8 @@ import com.android.ddmlib.FileListingService.FileEntry
 import com.xiaoming.state.GlobalState
 import com.xiaoming.utils.*
 import com.xiaoming.widget.*
-import config.route_left_item_color
+import com.xiaoming.config.route_left_item_color
+import com.xiaoming.theme.*
 import kotlinx.coroutines.*
 import theme.*
 

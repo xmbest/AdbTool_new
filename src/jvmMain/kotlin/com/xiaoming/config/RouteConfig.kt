@@ -1,11 +1,11 @@
-package config
+package com.xiaoming.config
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import theme.GOOGLE_BLUE
-import theme.SIMPLE_BLUE
-import theme.SIMPLE_GRAY
-import theme.SIMPLE_WHITE
+import com.xiaoming.theme.GOOGLE_BLUE
+import com.xiaoming.theme.SIMPLE_BLUE
+import com.xiaoming.theme.SIMPLE_GRAY
+import com.xiaoming.theme.SIMPLE_WHITE
 
 //左栏背景色
 val route_left_background = SIMPLE_BLUE

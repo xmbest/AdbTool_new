@@ -1,4 +1,4 @@
-package theme
+package com.xiaoming.theme
 
 import androidx.compose.ui.graphics.Color
 
