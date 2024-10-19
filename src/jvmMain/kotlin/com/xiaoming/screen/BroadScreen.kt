@@ -1,20 +1,20 @@
 package com.xiaoming.screen
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.xiaoming.config.FastBroadConfig
 import com.xiaoming.config.route_left_item_color
-import com.xiaoming.entity.ButtomData
 import com.xiaoming.entity.ButtomGroupData
 import com.xiaoming.entity.InputSendData
 import com.xiaoming.entity.ShellSendData

@@ -22,11 +22,11 @@ import androidx.compose.ui.unit.dp
 import com.xiaoming.utils.ClipboardUtils
 import com.xiaoming.utils.GenerexUtils
 import com.xiaoming.widget.Toast
-import config.route_left_item_color
-import theme.GOOGLE_BLUE
-import theme.GOOGLE_GREEN
-import theme.GOOGLE_RED
-import theme.GOOGLE_YELLOW
+import com.xiaoming.config.route_left_item_color
+import com.xiaoming.theme.GOOGLE_BLUE
+import com.xiaoming.theme.GOOGLE_GREEN
+import com.xiaoming.theme.GOOGLE_RED
+import com.xiaoming.theme.GOOGLE_YELLOW
 
 
 /**
