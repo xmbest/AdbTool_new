@@ -12,8 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.xiaoming.entity.ButtomGroupData
 import com.xiaoming.utils.AdbUtil
-import com.xiaoming.utils.GsonUtil
-import com.xiaoming.utils.LogUtil
 
 @Composable
 fun ButtomGroupWidget(data: ButtomGroupData) {
@@ -24,7 +22,6 @@ fun ButtomGroupWidget(data: ButtomGroupData) {
                 Button(
                     onClick = {
                         AdbUtil.shell(it.cmd)
-                        LogUtil.d(GsonUtil.gson.toJson(data))
                     }, modifier = Modifier.padding(end = 10.dp, top = 10.dp),
                     colors = if (it.btnBgColor.isNotBlank()) ButtonDefaults.buttonColors(
                         backgroundColor = Color(
