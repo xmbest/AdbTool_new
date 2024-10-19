@@ -7,7 +7,7 @@ plugins {
 
 group = "com.xiaoming"
 version = "1.0-SNAPSHOT"
-val appVersion = "1.0.3"
+val appVersion = "1.0.4"
 val exposedVersion: String by project
 repositories {
     maven ("https://maven.aliyun.com/repository/public/")
@@ -41,7 +41,7 @@ compose.desktop {
             modules("java.compiler", "java.instrument", "java.management", "jdk.unsupported")
         }
         buildTypes.release.proguard {
-//            isEnabled.set(false)
+            isEnabled.set(false)
             configurationFiles.from(project.file("compose-desktop.pro"))
         }
         mainClass = "MainKt"
