@@ -5,7 +5,7 @@ import com.xiaoming.state.GlobalState
 import com.xiaoming.widget.SimpleDialog
 import kotlinx.coroutines.*
 import org.jetbrains.skiko.hostOs
-import theme.GOOGLE_YELLOW
+import com.xiaoming.theme.GOOGLE_YELLOW
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

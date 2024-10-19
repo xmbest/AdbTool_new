@@ -2,10 +2,7 @@ package com.xiaoming.widget
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
@@ -14,8 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.xiaoming.entity.InputSendData
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.utils.LogUtil
@@ -51,7 +50,7 @@ fun InputSendWidget(data: InputSendData) {
                     }
                 },
                 singleLine = true,
-                placeholder = { Text(data.hint) },
+                placeholder = { Text(data.hint, fontSize = 14.sp) },
                 onValueChange = { text.value = it },
                 modifier = Modifier.weight(1f).fillMaxHeight().padding(end = 5.dp).onKeyEvent {
                     if (it.key.keyCode == Key.Enter.keyCode && it.type == KeyEventType.KeyUp) {
@@ -66,9 +65,20 @@ fun InputSendWidget(data: InputSendData) {
                 onClick = {
                     onClick(text.value, data)
                 },
-                modifier = Modifier.width(80.dp).fillMaxHeight().padding(start = 0.dp, end = 5.dp)
+                modifier = Modifier.width(80.dp).fillMaxHeight()
+                    .padding(start = 0.dp, end = 5.dp),
+                colors = if (data.btnBgColor.isNotBlank()) ButtonDefaults.buttonColors(
+                    backgroundColor = Color(
+                        data.getColorLong(
+                            data.btnBgColor
+                        )
+                    )
+                ) else ButtonDefaults.buttonColors()
             ) {
-                Text(text = data.btnText)
+                Text(
+                    text = data.btnText,
+                    color = if (data.btnTextColor.isNotBlank()) Color(data.getColorLong(data.btnTextColor)) else Color.Unspecified
+                )
             }
         }
     }
@@ -83,7 +93,7 @@ fun InputSendWidget(data: InputSendData) {
 fun onClick(text: String, data: InputSendData) {
     CoroutineScope(Dispatchers.Default).launch {
         if (text.isBlank()) {
-            Toast.show("内容不可空")
+            Toast.show(data.hint)
             return@launch
         }
         PropertiesUtil.setValue(data.uuid, text)

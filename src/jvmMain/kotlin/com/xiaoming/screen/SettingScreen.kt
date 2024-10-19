@@ -26,7 +26,7 @@ import com.xiaoming.config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import theme.GOOGLE_BLUE
+import com.xiaoming.theme.GOOGLE_BLUE
 
 
 @OptIn(ExperimentalFoundationApi::class)

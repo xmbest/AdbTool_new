@@ -16,7 +16,10 @@ object PropertiesUtil {
      * @param value
      */
     fun setValue(key: String?, value: String?, comments: String? = "") {
-        properties.setProperty(key, value)
+        key?.let {
+            properties.setProperty(key, value)
+        }
+
         var fileOutputStream: FileOutputStream? = null
         try {
             val file = File(GlobalState.workDir, "cfg.properties")
@@ -49,6 +52,14 @@ object PropertiesUtil {
      */
     fun all(): MutableSet<MutableMap.MutableEntry<Any, Any>> {
         return properties.entries
+    }
+
+    /**
+     * 删除key
+     */
+    fun remove(key: String) {
+        properties.remove(key)
+        setValue(null,"")
     }
 
 

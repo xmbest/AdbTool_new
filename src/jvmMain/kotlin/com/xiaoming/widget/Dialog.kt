@@ -14,9 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import theme.GOOGLE_BLUE
-import theme.GOOGLE_RED
-import theme.GOOGLE_YELLOW
+import com.xiaoming.theme.GOOGLE_BLUE
+import com.xiaoming.theme.GOOGLE_RED
+import com.xiaoming.theme.GOOGLE_YELLOW
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

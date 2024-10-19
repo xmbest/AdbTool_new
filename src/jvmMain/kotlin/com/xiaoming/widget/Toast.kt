@@ -18,7 +18,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import theme.GOOGLE_BLUE
+import com.xiaoming.theme.GOOGLE_BLUE
 
 /**
  * Toast属性

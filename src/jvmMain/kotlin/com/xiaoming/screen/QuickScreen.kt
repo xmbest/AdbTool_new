@@ -31,9 +31,9 @@ import com.xiaoming.config.route_left_item_color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import theme.GOOGLE_BLUE
-import theme.GOOGLE_GREEN
-import theme.GOOGLE_RED
+import com.xiaoming.theme.GOOGLE_BLUE
+import com.xiaoming.theme.GOOGLE_GREEN
+import com.xiaoming.theme.GOOGLE_RED
 import javax.swing.filechooser.FileSystemView
 
 val packageName = mutableStateOf("")
