@@ -18,7 +18,6 @@ import com.xiaoming.state.GlobalState
 import com.xiaoming.state.LocalDataKey
 import com.xiaoming.utils.PropertiesUtil
 import com.xiaoming.utils.getAdb
-import com.xiaoming.utils.initOsType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -70,7 +69,6 @@ fun main() = application {
             snapshotFlow { state.isMinimized }
                 .launchIn(this)
         }
-        initOsType()
         writeFile()
         App()
         dataInit()
@@ -106,9 +104,10 @@ private fun dataInit(){
 private fun writeFile(){
     val adb = Pair(getAdb(),"adb")
     val properties = Pair("cfg.properties","cfg")
+    val json = Pair("cfg.json","cfg")
     val push = Pair("push.sh","shell")
     val pull = Pair("pull.sh","shell")
-    val listFile = listOf(adb,properties,push,pull)
+    val listFile = listOf(adb,properties,json,push,pull)
     val parentDir = File(GlobalState.workDir)
     if (!parentDir.exists()){
         parentDir.mkdirs()

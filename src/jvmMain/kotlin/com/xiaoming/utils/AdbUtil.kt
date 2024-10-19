@@ -4,6 +4,7 @@ import com.android.ddmlib.*
 import com.xiaoming.state.GlobalState
 import com.xiaoming.widget.SimpleDialog
 import kotlinx.coroutines.*
+import org.jetbrains.skiko.hostOs
 import theme.GOOGLE_YELLOW
 import java.io.File
 import java.time.LocalDateTime
@@ -11,6 +12,12 @@ import java.time.format.DateTimeFormatter
 import javax.imageio.ImageIO
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+
+
+/**
+ * 获取 adb
+ */
+fun getAdb() = if (hostOs.isWindows) "adb.exe" else "adb"
 
 object AdbUtil {
 
@@ -309,10 +316,10 @@ object AdbUtil {
     fun pull(remote: String, local: String) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.let {
-                if (isMac) {
+                if (hostOs.isMacOS) {
                     FileUtil.writeShell("pull", "${GlobalState.adb.value} -s $it pull $remote $local/")
                     BashUtil.execCommand("open -b com.apple.terminal ${GlobalState.workDir + "/" + "pull.sh"}")
-                } else if (isWindows) {
+                } else if (hostOs.isWindows) {
                     BashUtil.execCommand("cmd.exe /c start cmd.exe /K ${GlobalState.adb.value} -s $it pull $remote $local/")
                 } else {
                     shellByProcess("pull $remote $local/")
@@ -330,10 +337,10 @@ object AdbUtil {
     fun push(local: String, remote: String) {
         CoroutineScope(Dispatchers.Default).launch {
             GlobalState.sCurrentDevice.value?.let {
-                if (isMac) {
+                if (hostOs.isMacOS) {
                     FileUtil.writeShell("push", "${GlobalState.adb.value} -s $it push $local $remote/")
                     BashUtil.execCommand("open -b com.apple.terminal ${GlobalState.workDir + "/" + "push.sh"}")
-                } else if (isWindows) {
+                } else if (hostOs.isWindows) {
                     BashUtil.execCommand("cmd.exe /c start cmd.exe /K ${GlobalState.adb.value} -s $it push $local $remote/")
                 } else {
                     shellByProcess("push $local $remote/")

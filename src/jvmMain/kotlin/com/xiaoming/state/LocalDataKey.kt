@@ -1,6 +1,7 @@
 package com.xiaoming.state
 
 import androidx.compose.runtime.MutableState
+import org.jetbrains.skiko.hostOs
 
 object LocalDataKey {
     val DEFAULT = Pair("DEFAULT","程序携带")
@@ -11,7 +12,7 @@ object LocalDataKey {
     val sAdbSelect = Pair("sAdbSelect",DEFAULT.first)
     val sSaveLog = Pair("sSaveLog","0")
     val sDefaultPageIndex = Pair("sDefaultPageIndex","0")
-    val sFileSavePath = Pair("sFileSavePath",System.getProperty("user.home"))
+    val sFileSavePath = Pair("sFileSavePath",System.getProperty("user.home") + if (hostOs.isWindows) "\\Desktop" else "" )
     val sList = listOf(sTaskSearchKeyWords,sAdbCustomPath,sAdbSelect,sSaveLog,sDefaultPageIndex,sFileSavePath)
     val sAdbEnvList  = listOf(DEFAULT,ENV,CUSTOM)
 
