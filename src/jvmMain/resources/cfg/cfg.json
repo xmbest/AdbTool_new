@@ -1,12 +1,12 @@
 [
   {
-    "title": "根据包名杀进程",
-    "cmd": "adb shell am force-stop %TEMP%",
+    "title": "语音塞文本",
+    "cmd": "adb shell am broadcast -a com.txznet.txz.invoke -d txznet://com.txznet.txz/comm.asr.startWithRawText?%TEMP%",
     "template": "%TEMP%",
-    "hint": "请输入对应包名",
-    "btnText": "Kill",
+    "hint": "请输入文本",
+    "btnText": "发送",
     "btnTextColor": "0xFFFAFAFA",
-    "btnBgColor": "0xFFf4433c",
+    "btnBgColor": "0xFF2d85f0",
     "type": "0",
     "uuid": "uuid-350b0282-836b-4aa2-a285-4906c8b3e846"
   },
