@@ -3,7 +3,9 @@ name: Mac CI
 on:
   push:
     branches:
+      - "dev"
       - "txz"
+      - "main"
 jobs:
   build:
 
