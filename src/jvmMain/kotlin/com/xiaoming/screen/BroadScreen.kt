@@ -22,6 +22,7 @@ import com.xiaoming.state.GlobalState
 import com.xiaoming.widget.ButtomGroupWidget
 import com.xiaoming.widget.InputSendWidget
 import com.xiaoming.widget.ShellSendWidget
+import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -33,7 +34,8 @@ fun BroadScreen() {
     ) {
         Row(modifier = Modifier.fillMaxWidth().padding(end = 2.dp), horizontalArrangement = Arrangement.End) {
             TooltipArea(tooltip = {
-                Text("config path ${GlobalState.workDir}\\cfg.json")
+                val file = File(GlobalState.workDir,"cfg.json")
+                Text("config path ${file.absolutePath}")
             }) {
                 Icon(
                     Icons.Default.Info,
