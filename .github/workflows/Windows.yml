@@ -6,6 +6,8 @@ on:
       - "dev"
       - "txz"
       - "main"
+      - "dev"
+      - "txz"
 jobs:
   build:
     runs-on: windows-latest
@@ -21,7 +23,7 @@ jobs:
       #     run: chmod +x gradlew
       - name: Build with Windows
         run: ./gradlew.bat packageReleaseMsi
-      #    - name: Build with MacOs
+      #    - name: Build with Windows
       #      run: ./gradlew.bat packageReleaseDmg
       - name: upload
         uses: actions/upload-artifact@v3

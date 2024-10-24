@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.xiaoming.entity.InputSendData
 import com.xiaoming.utils.AdbUtil
 import com.xiaoming.utils.LogUtil
@@ -34,7 +33,7 @@ fun InputSendWidget(data: InputSendData) {
         Spacer(Modifier.height(10.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().height(48.dp)
+            modifier = Modifier.fillMaxWidth().height(52.dp)
         ) {
             TextField(
                 text.value,
@@ -50,7 +49,7 @@ fun InputSendWidget(data: InputSendData) {
                     }
                 },
                 singleLine = true,
-                placeholder = { Text(data.hint, fontSize = 14.sp) },
+                placeholder = { Text(data.hint) },
                 onValueChange = { text.value = it },
                 modifier = Modifier.weight(1f).fillMaxHeight().padding(end = 5.dp).onKeyEvent {
                     if (it.key.keyCode == Key.Enter.keyCode && it.type == KeyEventType.KeyUp) {
