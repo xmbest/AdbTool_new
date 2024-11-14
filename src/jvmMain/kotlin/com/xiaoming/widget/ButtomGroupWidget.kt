@@ -21,7 +21,10 @@ fun ButtomGroupWidget(data: ButtomGroupData) {
             data.list.forEach {
                 Button(
                     onClick = {
-                        AdbUtil.shell(it.cmd)
+                        val arr = it.cmd.split(";")
+                        arr.forEach {
+                            AdbUtil.shell(it)
+                        }
                     }, modifier = Modifier.padding(end = 10.dp, top = 10.dp),
                     colors = if (it.btnBgColor.isNotBlank()) ButtonDefaults.buttonColors(
                         backgroundColor = Color(
