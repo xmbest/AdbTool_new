@@ -181,6 +181,7 @@ fun changePath(path: String) {
     while (temp.startsWith("/")) {
         temp = temp.removePrefix("/")
     }
+    filter.value = ""
     currentPath.value = temp
 }
 
