@@ -1,6 +1,6 @@
 [
   {
-    "title": "语音塞文本",
+    "title": "语音识别",
     "cmd": "adb shell am broadcast -a com.txznet.txz.invoke -d txznet://com.txznet.txz/comm.asr.startWithRawText?%TEMP%",
     "template": "%TEMP%",
     "hint": "请输入文本",
@@ -9,6 +9,77 @@
     "btnBgColor": "0xFF2d85f0",
     "type": "0",
     "uuid": "uuid-350b0282-836b-4aa2-a285-4906c8b3e846"
+  },
+  {
+    "title": "语音播报",
+    "cmd": "adb shell am broadcast -a com.txznet.txz.invoke -d \"txznet://com.txznet.txz/comm.tts.speakTextOnRecordWin?{\"text\":\"%TEMP%\"}\"",
+    "template": "%TEMP%",
+    "hint": "请输入文本",
+    "btnText": "发送",
+    "btnTextColor": "0xFFFAFAFA",
+    "btnBgColor": "0xFFF1C40F",
+    "type": "0",
+    "uuid": "uuid-350b0282-836b-4aa2-a285-4906c8b3e847"
+  },
+  {
+    "title": "语音功能",
+    "list": [
+      {
+        "btnText": "启动",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFFEF5350",
+        "cmd": "adb shell am broadcast -a com.txznet.txz.invoke -d \"txznet://com.txznet.txz/comm.asr.restartWithRecordWin?\""
+      },
+      {
+        "btnText": "关闭",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFFE67E22",
+        "cmd": "adb shell am broadcast -a com.txznet.txz.invoke -d \"txznet://com.txznet.txz/comm.asr.cancel\""
+      },
+      {
+        "btnText": "保存音频",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFFF1C40F",
+        "cmd": "adb shell am broadcast -a com.txznet.txz.record.save --ez enable true --ez left true --ez right true"
+      },
+      {
+        "btnText": "停止保存",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFF1ABC9C",
+        "cmd": "adb shell am broadcast -a com.txznet.txz.record.save --ez enable false"
+      },
+      {
+        "btnText": "进入倒车",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFF3498DB",
+        "cmd": "adb shell am broadcast -a com.txznet.txz.invoke -d \"txznet://com.txznet.txz/comm.power.ENTER_REVERSE\""
+      },
+      {
+        "btnText": "退出倒车",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFF8E44AD",
+        "cmd": "adb shell am broadcast -a com.txznet.txz.invoke -d \"txznet://com.txznet.txz/comm.power.QUIT_REVERSE\""
+      },
+      {
+        "btnText": "开启日志",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFFEF5350",
+        "cmd": "adb shell touch /sdcard/txz/log_enable_file;adb shell am force-stop com.txznet.txz"
+      },
+      {
+        "btnText": "关闭日志",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFFE67E22",
+        "cmd": "adb shell rm /sdcard/txz/log_enable_file;adb shell am force-stop com.txznet.txz"
+      },{
+        "btnText": "双杀",
+        "btnTextColor": "0xFFFAFAFA",
+        "btnBgColor": "0xFFF1C40F",
+        "cmd": "adb shell am force-stop com.txznet.txz;adb shell am force-stop com.txznet.adapter"
+      }
+    ],
+    "type": "1",
+    "uuid": "uuid-e1467311-26e4-4a2e-898a-73cbacc718a2"
   },
   {
     "title": "系统设置",
