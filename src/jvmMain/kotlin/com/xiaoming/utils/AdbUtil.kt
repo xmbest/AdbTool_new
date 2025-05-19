@@ -113,10 +113,6 @@ object AdbUtil {
         }
     }
 
-    fun getProp(key: String): String {
-        return GlobalState.sCurrentDevice.value?.getProperty(key) ?: ""
-    }
-
     /**
      * 删除文件
      * @param path 路径
@@ -549,7 +545,7 @@ object AdbUtil {
      */
     fun findProcessByKeyword(keyWord: String = "system", needA: Boolean = true, block: (List<String>) -> Unit) {
         val set = mutableSetOf<String>()
-        val cmd = "ps ${if (needA) "-A" else ""} | grep $keyWord"
+        val cmd = "ps ${if (needA) "-A" else ""} | grep -E '$keyWord'"
 
         GlobalState.sCurrentDevice.value?.executeShellCommand(cmd, object : MultiLineReceiver() {
             override fun isCancelled(): Boolean {

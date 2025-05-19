@@ -29,21 +29,24 @@ object AdbModule {
             GlobalState.sCurrentDevice.value?.let { it ->
                 it.serialNumber?.let { info.serialNo = it }
                 it.name.let { info.device = it }
-                info.memory = AdbUtil.shell("cat /proc/meminfo | grep MemTotal | awk '{print \$2/1024}'", 200) + "MB"
+                info.memory = AdbUtil.shell(
+                    "cat /proc/meminfo | grep MemTotal | awk '{print \$2/1024}'",
+                    200
+                ) + "MB"
                 info.density = AdbUtil.shell("wm size | awk '{print \$NF}'", 200)
                 it.density.let { info.density += "(dpi = $it)" }
-                info.cpu = AdbUtil.getProp("ro.soc.model")
-                info.cpu += "(" + it.getProperty("ro.product.cpu.abi") + ",core size = " + AdbUtil.shell(
+                info.cpu = it.getProperty("ro.soc.model","")
+                info.cpu += "(" + it.getProperty("ro.product.cpu.abi","") + ",core size = " + AdbUtil.shell(
                     "cat /proc/cpuinfo | grep processor | wc -l",
                     200
                 ) + ")"
-                info.systemVersion = it.getProperty("ro.bootimage.build.fingerprint")?:""
-                info.androidVersion = it.getProperty("ro.vendor.build.version.release")
+                info.systemVersion = it.getProperty("ro.bootimage.build.fingerprint","")
+                info.androidVersion = it.getProperty("ro.vendor.build.version.release", "")
                 if (info.androidVersion.isBlank()) {
                     info.androidVersion = it.getProperty("ro.build.version.release")
                 }
-                info.model = it.getProperty("ro.product.model")
-                info.brand = it.getProperty("ro.product.brand")
+                info.model = it.getProperty("ro.product.model","")
+                info.brand = it.getProperty("ro.product.brand","")
                 info.ip = AdbUtil.shell("ifconfig wlan0 |  grep addr:1 |  awk  '{print \$2}'", 200)
                 if (info.ip.contains(":")) {
                     info.ip = info.ip.split(":")[1]
@@ -51,6 +54,14 @@ object AdbModule {
             }
             deviceInfo.value = info
         }
+    }
+
+    fun DeviceImpl.getProperty(key: String, defValue: String): String {
+        return runCatching {
+            this.getProperty(key)
+        }.onFailure {
+            LogUtil.e(it.message.toString())
+        }.getOrNull() ?: defValue
     }
 
     /**
@@ -134,7 +145,8 @@ object AdbModule {
      */
     private fun init() {
         LogUtil.d("init adb = ${GlobalState.adb.value}")
-        AndroidDebugBridge.addDeviceChangeListener(object : AndroidDebugBridge.IDeviceChangeListener {
+        AndroidDebugBridge.addDeviceChangeListener(object :
+            AndroidDebugBridge.IDeviceChangeListener {
             override fun deviceConnected(device: IDevice?) {
                 device?.let {
                     addDevice(device)
