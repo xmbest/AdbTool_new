@@ -6,8 +6,6 @@ on:
       - "dev"
       - "txz"
       - "main"
-      - "dev"
-      - "txz"
   workflow_dispatch: {}
 
 jobs:
