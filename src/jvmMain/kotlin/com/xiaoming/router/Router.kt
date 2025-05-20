@@ -75,11 +75,6 @@ fun Router() {
     }
     //显示
     Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            "1.0.2 xmbest@github",
-            modifier = Modifier.align(Alignment.TopEnd).padding(end = 4.dp).clickable {
-                Toast.show("hello world!")
-            })
         Toast()
         if (showingSimpleDialog.value) {
             SimpleDialog(
